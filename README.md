@@ -63,5 +63,5 @@ Contribuições são bem-vindas! Siga estas etapas para contribuir:
 ## **Autor**
 
 * **Nome:** Jeferson Penna Alves
-* **Versão:** 1.0.0
+* **Versão:** 1.1.0
 * **Contato:** [jefersonpenna@gmail.com](mailto:jefersonpenna@gmail.com)
