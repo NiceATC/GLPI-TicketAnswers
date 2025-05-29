@@ -1,0 +1,173 @@
+/* Correções para os ícones de notificação */
+
+/* Remover bordas e estilizar como ícones simples */
+.notification-bell,
+.sound-toggle {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 6px !important;
+    margin: 0 3px !important;
+    height: auto !important;
+    width: auto !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    position: relative !important;
+}
+
+/* Garantir que os ícones tenham o mesmo tamanho */
+.notification-bell i,
+.sound-toggle i {
+    font-size: 18px !important;
+    line-height: 1 !important;
+    width: auto !important;
+    height: auto !important;
+    color: #666 !important;
+}
+
+/* Estilo para o ícone do sino quando há notificações */
+.notification-bell i.has-notifications {
+    color: #ff0000 !important;
+    animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        color: #ff0000;
+    }
+    to {
+        color: #ff0000;
+    }
+}
+
+/* Animação de vibração para o sino */
+@keyframes bell-shake {
+    0% { transform: rotate(0); }
+    5% { transform: rotate(15deg); }
+    10% { transform: rotate(-15deg); }
+    15% { transform: rotate(10deg); }
+    20% { transform: rotate(-10deg); }
+    25% { transform: rotate(5deg); }
+    30% { transform: rotate(-5deg); }
+    35% { transform: rotate(0); }
+    100% { transform: rotate(0); }
+}
+
+/* Classe para aplicar a animação de vibração */
+.notification-bell.animate-bell i {
+    animation: bell-shake 2s ease-in-out;
+    transform-origin: top center;
+}
+
+/* Animação de pulso para novas notificações */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.pulse-animation {
+    animation: pulse 0.5s 3;
+}
+
+/* Estilo para o ícone do sino quando há notificações */
+.notification-bell i.has-notifications {
+    color: #ff0000 !important;
+}
+
+/* Contador de notificações */
+.notification-count {
+    position: absolute !important;
+    top: -5px !important;
+    right: -5px !important;
+    background-color: #ff0000 !important;
+    color: white !important;
+    border-radius: 50% !important;
+    padding: 2px 5px !important;
+    font-size: 10px !important;
+    font-weight: bold !important;
+    line-height: 1 !important;
+    min-width: 15px !important;
+    text-align: center !important;
+}
+
+/* Contêiner para os ícones */
+.notification-container {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    margin: 0 5px !important;
+}
+
+/* Correções específicas para interface self-service */
+.self-service .notification-container,
+.navbar.self-service .notification-container,
+body.self-service .notification-container {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    margin: 0 10px !important;
+}
+
+/* Forçar layout horizontal para os botões na interface self-service */
+.self-service .notification-bell,
+.self-service .sound-toggle,
+.navbar.self-service .notification-bell,
+.navbar.self-service .sound-toggle,
+body.self-service .notification-bell,
+body.self-service .sound-toggle {
+    display: inline-block !important;
+    vertical-align: middle !important;
+    margin: 0 3px !important;
+    float: none !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Hover effects */
+.notification-bell:hover i,
+.sound-toggle:hover i {
+    color: #333 !important;
+}
+
+/* Efeito de foco */
+.notification-bell:focus,
+.sound-toggle:focus {
+    outline: none !important;
+}
+
+/* Garantir que os botões não tenham aparência de botão */
+.notification-bell.btn,
+.sound-toggle.btn {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Garantir que os botões não tenham aparência de botão mesmo com hover/focus */
+.notification-bell.btn:hover,
+.sound-toggle.btn:hover,
+.notification-bell.btn:focus,
+.sound-toggle.btn:focus,
+.notification-bell.btn:active,
+.sound-toggle.btn:active {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Correção específica para o problema de alinhamento vertical na interface self-service */
+@media screen and (max-width: 768px) {
+    .self-service .notification-container,
+    .navbar.self-service .notification-container,
+    body.self-service .notification-container {
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+    }
+}

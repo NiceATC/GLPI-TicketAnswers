@@ -1,0 +1,139 @@
+/*
+  -------------------------------------------------------------------------
+  Ticket Answers
+  Copyright (C) 2023 by Jeferson Penna Alves
+  -------------------------------------------------------------------------
+  LICENSE
+  This file is part of Ticket Answers.
+  Ticket Answers is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+  Ticket Answers is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  You should have received a copy of the GNU General Public License
+  along with Ticket Answers. If not, see <http://www.gnu.org/licenses/>.
+  --------------------------------------------------------------------------
+*/
+
+@keyframes bell-ring {
+  0% { transform: rotate(0); }
+  10% { transform: rotate(10deg); }
+  20% { transform: rotate(-10deg); }
+  30% { transform: rotate(10deg); }
+  40% { transform: rotate(-10deg); }
+  50% { transform: rotate(0); }
+  100% { transform: rotate(0); }
+}
+
+.notification-bell i.has-notifications {
+  color: #ff0000 !important;
+  animation: bell-ring 2s infinite;
+}
+
+.notification-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: rgba(236, 88, 19, 0.952);
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-bell {
+  position: relative;
+}
+
+/* ... código existente ... */
+
+/* Animação para remoção de notificações */
+@keyframes fadeOutUp {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(0, -20px, 0);
+  }
+}
+
+.fadeOutUp {
+  animation-name: fadeOutUp;
+  animation-duration: 0.5s;
+  animation-fill-mode: both;
+}
+
+/* Estilo para linhas de notificação */
+table.tab_cadre_fixehov tr {
+  transition: all 0.3s ease;
+/* Animações para atualização de notificações */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -20px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.fadeInDown {
+  animation-name: fadeInDown;
+  animation-duration: 0.5s;
+  animation-fill-mode: both;
+}
+
+/* Estilo para o container de notificações durante a atualização */
+#notifications-container.updating {
+  position: relative;
+}
+
+#notifications-container.updating::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Estilo para novas notificações */
+tr.new-notification {
+background-color: rgba(255, 255, 0, 0.1) !important;
+transition: background-color 2s ease;
+}
+
+.form-inline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 15px 0;
+}
+
+.form-control {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin: 0 5px;
+}
+
+.select-compact {
+    width: 80px !important;
+}
