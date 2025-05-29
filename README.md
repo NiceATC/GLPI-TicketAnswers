@@ -10,10 +10,17 @@ O Plugin Ticket Answers para GLPI foi desenvolvido para otimizar o gerenciamento
 * **Marcação Rápida de Notificações:** Botão dedicado para marcar todas as notificações como lidas, economizando tempo e esforço.
 * **Estatísticas de Interação:** Informações detalhadas sobre as interações nos tickets, fornecendo insights valiosos para a gestão de atendimento.
 
-![Screenshot_1](https://github.com/user-attachments/assets/b5d19e85-84e4-4da6-a699-489fc6839765)
+![image](https://github.com/user-attachments/assets/8f604ed0-b152-4668-85ce-5f5d522d0b2a)
+
+![image](https://github.com/user-attachments/assets/c0815e2b-c9ff-41f7-b3b1-5b1cf72c1386)
+
+![image](https://github.com/user-attachments/assets/48fe3f97-4e1c-4d7e-b7a8-8810d98ef1bc)
+
+![image](https://github.com/user-attachments/assets/4ac21b87-1634-41da-9ee5-545041cd1972)
 
 
-![image](https://github.com/user-attachments/assets/a9f15426-e503-489f-ad22-cc180319f05e)
+
+
 
 
 ## **Tecnologias Utilizadas**
@@ -24,7 +31,7 @@ O Plugin Ticket Answers para GLPI foi desenvolvido para otimizar o gerenciamento
 
 ## **Requisitos do Sistema**
 
-* **GLPI:** Compatível com versões 10.0.0 a 10.0.17.
+* **GLPI:** Compatível com versões 10.0.0 a 10.0.18.
 * **PHP:** Versão mínima recomendada 7.4.
 * **Banco de Dados:** MySQL/MariaDB.
 
