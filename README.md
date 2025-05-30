@@ -39,7 +39,7 @@ O Plugin Ticket Answers para GLPI foi desenvolvido para otimizar o gerenciamento
 4.  **Configuração de Plugins:** Navegue até `Configurar > Plugins`.
 5.  **Instalação:** Localize o plugin Ticket Answers e clique em "Instalar".
 6.  **Ativação:** Após a instalação, clique em "Ativar".
-7.  **Atualize** Atualize a página para as notificações aparecerem.
+7.  **Atualize:** Atualize a página para as notificações aparecerem.
 
 ## **Uso**
 
