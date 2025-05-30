@@ -7,13 +7,16 @@ O Plugin Ticket Answers para GLPI foi desenvolvido para otimizar o gerenciamento
 ## **Funcionalidades Principais**
 
 * **Notificações Visuais:** Alertas claros para respostas não lidas em tickets, garantindo que nenhuma interação importante seja perdida.
-* **Marcação Rápida de Notificações:** Botão dedicado para marcar todas as notificações como lidas, economizando tempo e esforço.
 * **Estatísticas de Interação:** Informações detalhadas sobre as interações nos tickets, fornecendo insights valiosos para a gestão de atendimento.
 
-![Screenshot_1](https://github.com/user-attachments/assets/b5d19e85-84e4-4da6-a699-489fc6839765)
+
+![image](https://github.com/user-attachments/assets/0ca2370c-d3e9-42ba-8ea3-6c5a2205aa2f)
 
 
-![image](https://github.com/user-attachments/assets/a9f15426-e503-489f-ad22-cc180319f05e)
+
+![image](https://github.com/user-attachments/assets/adf9ed27-db46-4165-8aea-65f347c93e2a)
+
+
 
 
 ## **Tecnologias Utilizadas**
@@ -24,7 +27,7 @@ O Plugin Ticket Answers para GLPI foi desenvolvido para otimizar o gerenciamento
 
 ## **Requisitos do Sistema**
 
-* **GLPI:** Compatível com versões 10.0.0 a 10.0.17.
+* **GLPI:** Compatível com versões 10.0.0 a 10.0.18.
 * **PHP:** Versão mínima recomendada 7.4.
 * **Banco de Dados:** MySQL/MariaDB.
 
@@ -36,11 +39,11 @@ O Plugin Ticket Answers para GLPI foi desenvolvido para otimizar o gerenciamento
 4.  **Configuração de Plugins:** Navegue até `Configurar > Plugins`.
 5.  **Instalação:** Localize o plugin Ticket Answers e clique em "Instalar".
 6.  **Ativação:** Após a instalação, clique em "Ativar".
+7.  **Atualize a pagina.**
 
 ## **Uso**
 
 * **Ícone de Notificação:** Um ícone de sino será exibido ao lado da barra de pesquisa global no GLPI.
-* **Contagem de Notificações:** O ícone indicará o número de notificações não lidas.
 * **Acesso à Lista de Notificações:** Clique no sino para acessar a lista completa de notificações.
 
 ## **Contribuição**
@@ -56,5 +59,5 @@ Contribuições são bem-vindas! Siga estas etapas para contribuir:
 ## **Autor**
 
 * **Nome:** Jeferson Penna Alves
-* **Versão:** 1.0.0
+* **Versão:** 1.1.0
 * **Contato:** [jefersonpenna@gmail.com](mailto:jefersonpenna@gmail.com)
