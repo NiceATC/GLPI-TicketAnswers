@@ -390,29 +390,44 @@ UNION
 UNION
 (
     -- Notificações de chamados onde o usuário é observador
-    SELECT
-        t.id AS ticket_id,
-        t.name AS ticket_name,
-        t.content AS ticket_content,
-        0 AS followup_id,
-        t.date_mod AS notification_date,  -- Usar data de modificação do ticket
-        t.content AS followup_content,    -- Usar conteúdo do ticket
-        u_requester.name AS user_name,    -- Nome do solicitante
-        NULL AS group_name,
-        NULL AS refuse_reason,
-        'observer' AS notification_type
-    FROM
-        glpi_tickets t
-        INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 3 AND tu.users_id = $users_id
-        LEFT JOIN glpi_users u_requester ON t.users_id_recipient = u_requester.id  -- Para obter o solicitante
-        LEFT JOIN glpi_plugin_ticketanswers_views v ON (
-            v.users_id = $users_id AND
-            v.ticket_id = t.id AND
-            v.followup_id = t.id + 20000000
-        )
-    WHERE
-        v.id IS NULL
-        AND t.status IN (1, 2, 3, 4)  -- Novo, Em atendimento, Pendente, Solucionado)
+SELECT
+    t.id AS ticket_id,
+    t.name AS ticket_name,
+    t.content AS ticket_content,
+    0 AS followup_id,
+    t.date_mod AS notification_date,  -- Usar data de modificação do ticket
+    t.content AS followup_content,    -- Usar conteúdo do ticket
+    u_requester.name AS user_name,    -- Nome do solicitante
+    NULL AS group_name,
+    NULL AS refuse_reason,
+    'observer' AS notification_type
+FROM
+    glpi_tickets t
+    INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 3 AND tu.users_id = $users_id
+    LEFT JOIN glpi_users u_requester ON t.users_id_recipient = u_requester.id  -- Para obter o solicitante
+    LEFT JOIN glpi_plugin_ticketanswers_views v ON (
+        v.users_id = $users_id AND
+        v.ticket_id = t.id AND
+        v.followup_id = t.id + 20000000
+    )
+WHERE
+    v.id IS NULL
+    AND t.status IN (1, 2, 3, 4)  -- Novo, Em atendimento, Pendente, Solucionado)
+    AND NOT EXISTS (
+        SELECT 1 
+        FROM glpi_tickets_users requester
+        WHERE requester.tickets_id = t.id
+        AND requester.users_id = $users_id 
+        AND requester.type = 1
+    )
+    AND NOT EXISTS (
+        SELECT 1 
+        FROM glpi_tickets_users technician
+        WHERE technician.tickets_id = t.id
+        AND technician.users_id = $users_id 
+        AND technician.type = 2
+    )
+
 
 )
 UNION
@@ -1145,8 +1160,8 @@ echo "</td>";
                     echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", 0, \"" . $notification_type . "\", false)' class='btn btn-info' title='" . __("Ver chamado", "ticketanswers") . "'>
                     <i class='fas fa-eye'></i>
                   </a>";
-                    // Link para ver em nova aba
-                    echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"followup\", true); return false;' class='btn btn-secondary' title='" . __("Ver em nova aba", "ticketanswers") . "'>
+                    // Link para ver em nova aba - CORREÇÃO
+                    echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", 0, \"" . $notification_type . "\", true); return false;' class='btn btn-secondary' title='" . __("Ver em nova aba", "ticketanswers") . "'>
                     <i class='fas fa-external-link-alt'></i>
                   </a>";
                     break;

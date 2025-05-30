@@ -157,20 +157,19 @@ WHERE
     AND t.status IN (1, 2)
     AND t.date_mod > DATE_SUB(NOW(), INTERVAL 7 DAY)";
 
-// Consulta para encontrar validações pendentes
+// Consulta para encontrar validações pendentes - baseada na consulta de diagnóstico que funciona
 $validation_query = "SELECT COUNT(DISTINCT tv.id) as validation_count
-FROM
-    glpi_tickets t
-    INNER JOIN glpi_ticketvalidations tv ON t.id = tv.tickets_id AND tv.users_id_validate = $users_id
-    LEFT JOIN glpi_plugin_ticketanswers_views v ON (
-        v.users_id = $users_id AND
-        v.ticket_id = t.id AND
-        v.followup_id = tv.id
-    )
-WHERE
-    t.status != 6  -- Excluir chamados fechados
+FROM glpi_ticketvalidations tv 
+JOIN glpi_tickets t ON tv.tickets_id = t.id
+LEFT JOIN glpi_plugin_ticketanswers_views v ON (
+    v.users_id = $users_id AND 
+    v.followup_id = tv.id
+)
+WHERE 
+    tv.users_id_validate = $users_id
     AND tv.status = 2
-    AND v.id IS NULL";
+    AND t.status != 6
+    AND v.id IS NULL";  
 
 // Consulta para encontrar respostas a validações solicitadas pelo usuário
 $validation_response_query = "SELECT COUNT(DISTINCT tv.id) as validation_response_count
@@ -376,6 +375,90 @@ if ($assigned_tech_result && $DB->numrows($assigned_tech_result) > 0) {
     $assigned_tech_data = $DB->fetchAssoc($assigned_tech_result);
     $assigned_tech_count = $assigned_tech_data['assigned_tech_count'];
 }
+
+// SOLUÇÃO DE FORÇA BRUTA PARA O CONTADOR DE VALIDAÇÃO
+// Esta solução força o contador de validação com base no diagnóstico que sabemos que funciona
+$force_validation_sql = "SELECT COUNT(DISTINCT tv.id) as direct_count
+                        FROM glpi_ticketvalidations tv 
+                        JOIN glpi_tickets t ON tv.tickets_id = t.id
+                        LEFT JOIN glpi_plugin_ticketanswers_views v ON (
+                            v.users_id = $users_id AND 
+                            v.followup_id = tv.id
+                        )
+                        WHERE 
+                            tv.users_id_validate = $users_id
+                            AND tv.status = 2
+                            AND t.status != 6
+                            AND v.id IS NULL";
+
+$force_result = $DB->query($force_validation_sql);
+if ($force_result && $DB->numrows($force_result) > 0) {
+    $force_data = $DB->fetchAssoc($force_result);
+    $direct_count = intval($force_data['direct_count']);
+    
+    // Sobrescrever diretamente o contador de validação com o valor correto
+    $validation_count = $direct_count;
+    
+    error_log("FORÇA BRUTA: Substituindo validation_count para $direct_count");
+}
+
+// SOLUÇÃO DE FORÇA BRUTA PARA O CONTADOR DE OBSERVADOR
+// Consulta direta para contar tickets onde o usuário é observador
+$force_observer_sql = "SELECT COUNT(DISTINCT t.id) as direct_count
+                      FROM glpi_tickets t
+                      INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id 
+                            AND tu.type = 3 
+                            AND tu.users_id = $users_id
+                      LEFT JOIN glpi_plugin_ticketanswers_views v ON (
+                          v.users_id = $users_id AND
+                          v.followup_id = t.id + 20000000
+                      )
+                      WHERE
+                          v.id IS NULL
+                          AND t.status IN (1, 2, 3, 4)";  // Incluindo status 3 e 4 também
+
+$force_observer_result = $DB->query($force_observer_sql);
+if ($force_observer_result && $DB->numrows($force_observer_result) > 0) {
+    $force_observer_data = $DB->fetchAssoc($force_observer_result);
+    $direct_observer_count = intval($force_observer_data['direct_count']);
+    
+    // Sobrescrever diretamente o contador de observador com o valor correto
+    $observer_count = $direct_observer_count;
+    
+    error_log("FORÇA BRUTA: Substituindo observer_count para $direct_observer_count");
+}
+
+// SOLUÇÃO DE FORÇA BRUTA PARA O CONTADOR DE MUDANÇAS DE STATUS
+$force_status_change_sql = "SELECT COUNT(DISTINCT t.id) as direct_count
+                           FROM glpi_tickets t
+                           INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id 
+                                 AND tu.type = 1 
+                                 AND tu.users_id = $users_id
+                           LEFT JOIN glpi_plugin_ticketanswers_views v ON (
+                               v.users_id = $users_id AND
+                               v.ticket_id = t.id AND
+                               (
+                                   v.followup_id = CONCAT('status_', t.id, '_', t.status) OR
+                                   v.followup_id = CONCAT('status_', t.id, '_any')
+                               )
+                           )
+                           WHERE
+                               v.id IS NULL
+                               AND t.status IN (2, 4, 5)  -- Em atendimento, Pendente, Solucionado
+                               AND t.date_mod > DATE_SUB(NOW(), INTERVAL 7 DAY)";
+
+$force_status_result = $DB->query($force_status_change_sql);
+if ($force_status_result && $DB->numrows($force_status_result) > 0) {
+    $force_status_data = $DB->fetchAssoc($force_status_result);
+    $direct_status_count = intval($force_status_data['direct_count']);
+    
+    // Sobrescrever diretamente o contador de mudanças de status
+    $status_change_count = $direct_status_count;
+    
+    error_log("FORÇA BRUTA: Substituindo status_change_count para $direct_status_count");
+}
+
+
 
 // Calcular o total de notificações
 // MODIFICAÇÃO PRINCIPAL: Consulta unificada para contar o total real de notificações
@@ -693,6 +776,13 @@ $final_count = max($total_count_unified, $total_count_sum);
 
 // Adicionar log para depuração
 error_log("DEBUG: Contagens após agrupamento - unificada=$total_count_unified, soma=$total_count_sum, final=$final_count");
+
+// DIAGNÓSTICO FINAL
+error_log("=== CONTADORES FINAIS ===");
+error_log("validation_count: $validation_count");
+error_log("total_count_sum: $total_count_sum");
+error_log("final_count: $final_count");
+error_log("unified_count: $total_count_unified");
 
 // Preparar a resposta com o valor correto de contagem
 $response = [
@@ -1118,6 +1208,38 @@ foreach ($validation_response_notifications as $notification) {
     
     $response['all_notifications'] = $all_notifications;
 }
+
+// CÓDIGO DE DIAGNÓSTICO TEMPORÁRIO
+// Consulta direta para verificar se existem validações para o usuário
+$diagnostic_sql = "SELECT tv.id, t.name, tv.status, tv.submission_date, tv.users_id, tv.users_id_validate, 
+                        IF(tv.users_id_validate = $users_id, 'Sou o validador', 'Não sou o validador') as role
+                   FROM glpi_ticketvalidations tv 
+                   JOIN glpi_tickets t ON tv.tickets_id = t.id
+                   WHERE (tv.users_id_validate = $users_id OR tv.users_id = $users_id)
+                   AND tv.status = 2
+                   AND t.status != 6
+                   ORDER BY tv.submission_date DESC
+                   LIMIT 5";
+
+$result = $DB->query($diagnostic_sql);
+error_log("=== DIAGNÓSTICO DE VALIDAÇÕES ===");
+if ($result && $DB->numrows($result) > 0) {
+    while ($row = $DB->fetchAssoc($result)) {
+        error_log(json_encode($row));
+        
+        // Verificar se há um registro de visualização para esta validação
+        $view_sql = "SELECT id FROM glpi_plugin_ticketanswers_views 
+                     WHERE users_id = $users_id AND followup_id = {$row['id']}";
+        $view_result = $DB->query($view_sql);
+        $viewed = ($view_result && $DB->numrows($view_result) > 0) ? "SIM" : "NÃO";
+        error_log("Validação ID {$row['id']} já foi visualizada? $viewed");
+    }
+} else {
+    error_log("Nenhuma validação pendente encontrada para o usuário $users_id");
+}
+
+// Verificar como o contador final está sendo calculado
+error_log("=== VERIFICAÇÃO DE CONTADORES ===");
 
 // Retornar a resposta como JSON
 header('Content-Type: application/json');
