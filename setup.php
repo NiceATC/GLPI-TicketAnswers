@@ -19,7 +19,11 @@
   --------------------------------------------------------------------------
 */
 
-define('PLUGIN_TICKETANSWERS_VERSION', '1.1.0');
+define('PLUGIN_TICKETANSWERS_VERSION', '2.0.0');
+
+// Definir diretório raiz do plugin
+define('PLUGIN_TICKETANSWERS_DIR', Plugin::getPhpDir('ticketanswers'));
+define('PLUGIN_TICKETANSWERS_WEB_DIR', Plugin::getWebDir('ticketanswers'));
 
 /**
   * Inicialização do plugin
@@ -28,19 +32,21 @@ function plugin_init_ticketanswers() {
     global $PLUGIN_HOOKS;
    
     $PLUGIN_HOOKS['csrf_compliant']['ticketanswers'] = true;
+    
+    // DESABILITAR COMPLETAMENTE O SISTEMA DE TRADUÇÕES DO GLPI
+    // Isso previne o carregamento de locales e o erro 404
+    $PLUGIN_HOOKS['add_javascript']['ticketanswers'] = false;
+    $PLUGIN_HOOKS['add_css']['ticketanswers'] = false;
    
     if (Session::getLoginUserID()) {
-        // Opção 1: Usando array para múltiplos scripts
-        $PLUGIN_HOOKS['add_javascript']['ticketanswers'] = [
-            'js/unified_notifications.js',
-            'js/notification_bell.js',
-            'js/fix_layout.js'
-        ];
-        
-        // OU Opção 2: Usando string para um único script principal
-        // $PLUGIN_HOOKS['add_javascript']['ticketanswers'] = 'js/unified_notifications.js';
-        
-        $PLUGIN_HOOKS['add_css']['ticketanswers'][] = 'css/self_service_fixes.css';
+        // Não adicionar JS/CSS globalmente - isso causa conflitos
+        // Os arquivos serão carregados apenas nas páginas do plugin
+        // $PLUGIN_HOOKS['add_javascript']['ticketanswers'] = [
+        //     'js/unified_notifications.js',
+        //     'js/notification_bell.js',
+        //     'js/fix_layout.js'
+        // ];
+        // $PLUGIN_HOOKS['add_css']['ticketanswers'][] = 'css/self_service_fixes.css';
         
         Plugin::registerClass('PluginTicketanswersProfile', ['addtabon' => 'Profile']);
         $PLUGIN_HOOKS['menu_toadd']['ticketanswers'] = ['plugins' => 'PluginTicketanswersMenu'];
@@ -51,12 +57,17 @@ function plugin_init_ticketanswers() {
   */
 function plugin_version_ticketanswers() {
     return [
-       'name'           => 'Ticket Answers',
+       'name'           => 'Respostas de Tickets e Notificações',
        'version'        => PLUGIN_TICKETANSWERS_VERSION,
        'author'         => 'Jeferson Penna Alves',
        'license'        => 'GPLv2+',
        'homepage'       => 'https://github.com/jefersonalves/ticketanswers',
-       'minGlpiVersion' => '9.5'
+       'requirements'   => [
+           'glpi' => [
+               'min' => '11.0',
+               'dev' => false
+           ]
+       ]
     ];
 }
 
@@ -64,7 +75,8 @@ function plugin_version_ticketanswers() {
   * Verificação de requisitos
   */
 function plugin_ticketanswers_check_prerequisites() {
-    if (version_compare(GLPI_VERSION, '9.5', 'lt')) {
+    if (version_compare(GLPI_VERSION, '11.0', 'lt')) {
+       echo "Este plugin requer GLPI >= 11.0";
        return false;
     }
     return true;

@@ -1,0 +1,54 @@
+{
+  "name": "ticketanswers",
+  "version": "2.0.0",
+  "glpi_min_version": "11.0",
+  "php_min_version": "8.1",
+  "author": "Jeferson Penna Alves",
+  "homepage": "https://github.com/jefersonalves/ticketanswers",
+  "license": "GPLv2+",
+  "description": {
+    "pt_BR": "Plugin para gerenciamento de notificações e respostas de tickets no GLPI",
+    "en_US": "Plugin for managing ticket notifications and answers in GLPI"
+  },
+  "requirements": {
+    "glpi": {
+      "min": "11.0",
+      "max": null,
+      "dev": false
+    },
+    "php": {
+      "min": "8.1",
+      "exts": [
+        "mysqli",
+        "json"
+      ]
+    },
+    "database": {
+      "engines": ["MySQL >= 8.0", "MariaDB >= 10.5"]
+    }
+  },
+  "features": [
+    "Notificações visuais de respostas em tickets",
+    "Sistema de sino de notificações integrado",
+    "Estatísticas de interações em tickets",
+    "Marcação de notificações como lidas",
+    "Suporte a múltiplos idiomas"
+  ],
+  "changelog": {
+    "2.0.0": {
+      "date": "2025-10-22",
+      "description": "Atualização completa para GLPI 11",
+      "changes": [
+        "Suporte para GLPI 11.0+",
+        "Requisito mínimo de PHP 8.1",
+        "Ícones Tabler Icons",
+        "Melhorias de performance",
+        "Sistema de log modernizado"
+      ]
+    }
+  },
+  "support": {
+    "issues": "https://github.com/jefersonalves/ticketanswers/issues",
+    "documentation": "https://github.com/jefersonalves/ticketanswers/wiki"
+  }
+}

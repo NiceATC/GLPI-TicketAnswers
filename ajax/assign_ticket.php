@@ -28,8 +28,8 @@ if ($ticket_id > 0) {
                   AND gu.users_id = $users_id";
         
         error_log("Executando query: $query");
-        $result = $DB->query($query);
-        $data = $DB->fetchAssoc($result);
+        $result = $DB->doQuery($query);
+        $data = $result->fetch_assoc();
         error_log("Resultado da query: " . print_r($data, true));
         
         if ($data['count'] > 0) {

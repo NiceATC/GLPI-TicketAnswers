@@ -5,9 +5,9 @@ Session::checkLoginUser();
 
 // Verificar se os parâmetros necessários foram fornecidos
 $ticket_id = isset($_GET['ticket_id']) ? intval($_GET['ticket_id']) : 0;
-$followup_id = isset($_GET['followup_id']) ? $_GET['followup_id'] : 0;
-$notification_type = isset($_GET['type']) ? $_GET['type'] : 'followup';
-$message_id = isset($_GET['message_id']) ? $_GET['message_id'] : null;
+$followup_id = isset($_GET['followup_id']) ? intval($_GET['followup_id']) : 0;
+$notification_type = isset($_GET['type']) ? $DB->escape($_GET['type']) : 'followup';
+$message_id = isset($_GET['message_id']) ? intval($_GET['message_id']) : null;
 $users_id = Session::getLoginUserID();
 $success = false;
 
@@ -64,7 +64,7 @@ if ($ticket_id > 0) {
             error_log("Executando query para status_change: $query");
             
             // Executar a query
-            $insertResult = $DB->query($query);
+            $insertResult = $DB->doQuery($query);
             
             if ($insertResult) {
                 error_log("Registro de status_change inserido ou atualizado com sucesso");
@@ -76,7 +76,7 @@ if ($ticket_id > 0) {
                          VALUES ('$ticket_id', $users_id, '$alternative_id', '$current_datetime', $message_id_value)
                          ON DUPLICATE KEY UPDATE viewed_at = '$current_datetime'";
                          
-                $DB->query($query); // Executar mas não verificar resultado, é apenas uma tentativa adicional
+                $DB->doQuery($query); // Executar mas não verificar resultado, é apenas uma tentativa adicional
                 
                 $success = true;
             } else {
@@ -106,7 +106,7 @@ if ($ticket_id > 0) {
             error_log("Executando query: $query");
             
             // Executar a query
-            $insertResult = $DB->query($query);
+            $insertResult = $DB->doQuery($query);
             
             if ($insertResult) {
                 error_log("Registro inserido ou atualizado com sucesso");
@@ -144,7 +144,7 @@ function markNotificationAsRead($DB, $ticket_id, $users_id, $followup_id, $curre
     error_log("Executando query: $query");
     
     // Executar a query
-    $insertResult = $DB->query($query);
+    $insertResult = $DB->doQuery($query);
     
     if ($insertResult) {
         error_log("Registro inserido ou atualizado com sucesso para followup_id=$followup_id");

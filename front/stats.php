@@ -6,17 +6,18 @@ Session::checkLoginUser();
 Html::header("Ticket Answers", $_SERVER['PHP_SELF'], "plugins", "pluginticketanswersmenu", "stats");
 
 echo "<div class='center'>";
-echo "<h1>" . __("Estatísticas do Ticket Answers", "ticketanswers") . "</h1>";
+echo "<h1>Estatísticas do Ticket Answers</h1>";
 
 // Obter estatísticas
 $users_id = Session::getLoginUserID();
+global $DB;
 
 // Total de notificações recebidas
 $query = "SELECT COUNT(*) as total FROM glpi_plugin_ticketanswers_views WHERE users_id = $users_id";
-$result = $DB->query($query);
+$result = $DB->doQuery($query);
 $total_views = 0;
-if ($result && $DB->numrows($result) > 0) {
-    $data = $DB->fetchAssoc($result);
+if ($result && $result->num_rows > 0) {
+    $data = $result->fetch_assoc();
     $total_views = $data['total'];
 }
 
@@ -34,10 +35,10 @@ ORDER BY
     view_date DESC
 LIMIT 10";
 
-$result = $DB->query($query);
+$result = $DB->doQuery($query);
 $daily_stats = [];
 if ($result) {
-    while ($data = $DB->fetchAssoc($result)) {
+    while ($data = $result->fetch_assoc()) {
         $daily_stats[] = $data;
     }
 }
@@ -45,8 +46,8 @@ if ($result) {
 // Exibir estatísticas
 echo "<div class='tab_cadre_fixe'>";
 echo "<table class='tab_cadre_fixe'>";
-echo "<tr><th colspan='2'>" . __("Resumo de Notificações", "ticketanswers") . "</th></tr>";
-echo "<tr><td>" . __("Total de notificações visualizadas", "ticketanswers") . "</td><td>$total_views</td></tr>";
+echo "<tr><th colspan='2'>Resumo de Notificações</th></tr>";
+echo "<tr><td>Total de notificações visualizadas</td><td>$total_views</td></tr>";
 echo "</table>";
 echo "</div>";
 
@@ -54,8 +55,8 @@ echo "</div>";
 if (count($daily_stats) > 0) {
     echo "<div class='tab_cadre_fixe'>";
     echo "<table class='tab_cadre_fixe'>";
-    echo "<tr><th colspan='2'>" . __("Notificações por dia", "ticketanswers") . "</th></tr>";
-    echo "<tr><th>" . __("Data", "ticketanswers") . "</th><th>" . __("Quantidade", "ticketanswers") . "</th></tr>";
+    echo "<tr><th colspan='2'>Notificações por dia</th></tr>";
+    echo "<tr><th>Data</th><th>Quantidade</th></tr>";
     
     foreach ($daily_stats as $stat) {
         echo "<tr><td>" . $stat['view_date'] . "</td><td>" . $stat['count'] . "</td></tr>";

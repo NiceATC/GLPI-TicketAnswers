@@ -9,15 +9,15 @@ Html::header("Ticket Answers", $_SERVER['PHP_SELF'], "plugins", "pluginticketans
 if (isset($_POST['update'])) {
     Session::checkRight("config", UPDATE);
     
-    // Salvar configurações
+    // Salvar configurações com sanitização
     Config::setConfigurationValues('plugin:ticketanswers', [
-        'check_interval' => $_POST['check_interval'],
+        'check_interval' => intval($_POST['check_interval']),
         'enable_sound' => isset($_POST['enable_sound']) ? 1 : 0,
-        'notifications_per_page' => $_POST['notifications_per_page'],
+        'notifications_per_page' => intval($_POST['notifications_per_page']),
         'auto_refresh' => isset($_POST['auto_refresh']) ? 1 : 0
     ]);
     
-    Session::addMessageAfterRedirect(__('Configurações salvas com sucesso', 'ticketanswers'), true, INFO);
+    Session::addMessageAfterRedirect('Configurações salvas com sucesso', true, INFO);
     Html::back();
 }
 
@@ -31,14 +31,14 @@ $notifications_per_page = $config['notifications_per_page'] ?? 10;
 $auto_refresh = $config['auto_refresh'] ?? 1;
 
 echo "<div class='center'>";
-echo "<h1>" . __("Configuração do Ticket Answers", "ticketanswers") . "</h1>";
+echo "<h1>Configuração do Ticket Answers</h1>";
 
 echo "<form name='form' method='post' action='" . $_SERVER['PHP_SELF'] . "'>";
 echo "<table class='tab_cadre_fixe'>";
 
 // Intervalo de verificação
 echo "<tr class='tab_bg_1'>";
-echo "<td>" . __("Intervalo de verificação (segundos)", "ticketanswers") . "</td>";
+echo "<td>Intervalo de verificação (segundos)</td>";
 echo "<td>";
 echo "<input type='number' name='check_interval' value='$check_interval' min='10' max='300'>";
 echo "</td>";
@@ -46,7 +46,7 @@ echo "</tr>";
 
 // Habilitar som
 echo "<tr class='tab_bg_1'>";
-echo "<td>" . __("Habilitar notificação sonora", "ticketanswers") . "</td>";
+echo "<td>Habilitar notificação sonora</td>";
 echo "<td>";
 echo "<input type='checkbox' name='enable_sound' " . ($enable_sound ? "checked" : "") . ">";
 echo "</td>";
@@ -54,7 +54,7 @@ echo "</tr>";
 
 // Volume do som
 echo "<tr class='tab_bg_1'>";
-echo "<td>" . __("Volume do som (0-100)", "ticketanswers") . "</td>";
+echo "<td>Volume do som (0-100)</td>";
 echo "<td>";
 echo "<input type='range' name='sound_volume' min='0' max='100' value='" . ($config['sound_volume'] ?? 50) . "' style='width: 200px;'>";
 echo "</td>";
@@ -62,7 +62,7 @@ echo "</tr>";
 
 // Atualização automática
 echo "<tr class='tab_bg_1'>";
-echo "<td>" . __("Atualizar automaticamente a página de notificações", "ticketanswers") . "</td>";
+echo "<td>Atualizar automaticamente a página de notificações</td>";
 echo "<td>";
 echo "<input type='checkbox' name='auto_refresh' " . ($auto_refresh ? "checked" : "") . ">";
 echo "</td>";
@@ -70,7 +70,7 @@ echo "</tr>";
 
 // Notificações por página
 echo "<tr class='tab_bg_1'>";
-echo "<td>" . __("Notificações por página", "ticketanswers") . "</td>";
+echo "<td>Notificações por página</td>";
 echo "<td>";
 echo "<input type='number' name='notifications_per_page' value='$notifications_per_page' min='5' max='50'>";
 echo "</td>";
@@ -88,14 +88,14 @@ echo "</div>";
 
 Html::footer();
 echo "<div class='center'>";
-echo "<h1>" . __("Configuração do Ticket Answers", "ticketanswers") . "</h1>";
+echo "<h1>Configuração do Ticket Answers</h1>";
 
 echo "<form name='form' method='post' action='" . $_SERVER['PHP_SELF'] . "'>";
 echo "<table class='tab_cadre_fixe'>";
 
 // Intervalo de verificação
 echo "<tr class='tab_bg_1'>";
-echo "<td>" . __("Intervalo de verificação (segundos)", "ticketanswers") . "</td>";
+echo "<td>Intervalo de verificação (segundos)</td>";
 echo "<td>";
 echo "<input type='number' name='check_interval' value='$check_interval' min='10' max='300'>";
 echo "</td>";
@@ -103,7 +103,7 @@ echo "</tr>";
 
 // Habilitar som
 echo "<tr class='tab_bg_1'>";
-echo "<td>" . __("Habilitar notificação sonora", "ticketanswers") . "</td>";
+echo "<td>Habilitar notificação sonora</td>";
 echo "<td>";
 echo "<input type='checkbox' name='enable_sound' " . ($enable_sound ? "checked" : "") . ">";
 echo "</td>";
@@ -111,7 +111,7 @@ echo "</tr>";
 
 // Atualização automática
 echo "<tr class='tab_bg_1'>";
-echo "<td>" . __("Atualizar automaticamente a página de notificações", "ticketanswers") . "</td>";
+echo "<td>Atualizar automaticamente a página de notificações</td>";
 echo "<td>";
 echo "<input type='checkbox' name='auto_refresh' " . ($auto_refresh ? "checked" : "") . ">";
 echo "</td>";
@@ -119,7 +119,7 @@ echo "</tr>";
 
 // Notificações por página
 echo "<tr class='tab_bg_1'>";
-echo "<td>" . __("Notificações por página", "ticketanswers") . "</td>";
+echo "<td>Notificações por página</td>";
 echo "<td>";
 echo "<input type='number' name='notifications_per_page' value='$notifications_per_page' min='5' max='50'>";
 echo "</td>";
@@ -137,7 +137,7 @@ echo "</div>";
 
 // Após o formulário de configuração
 echo "<div class='center' style='margin-top: 20px;'>";
-echo "<button type='button' class='btn btn-primary' id='test-sound-button'>" . __("Testar Som", "ticketanswers") . "</button>";
+echo "<button type='button' class='btn btn-primary' id='test-sound-button'>Testar Som</button>";
 echo "<div id='sound-test-result' style='margin-top: 10px;'></div>";
 echo "</div>";
 

@@ -44,7 +44,7 @@ echo Html::script("/plugins/ticketanswers/js/notification_bell.js");
 echo "<script>
 // Função para marcar todas as notificações como lidas
 function markAllAsRead() {
-    if (confirm('" . __("Deseja realmente marcar todas as notificações como lidas?", "ticketanswers") . "')) {
+    if (confirm('Deseja realmente marcar todas as notificações como lidas?')) {
         $.ajax({
             url: '../ajax/mark_all_as_read.php',
             type: 'GET',
@@ -133,7 +133,7 @@ function markNotificationAsRead(ticketId, followupId, type, newTab) {
                 if ($('table.tab_cadre_fixehov tr').length <= 1) {
                     // Se só sobrou o cabeçalho, mostrar mensagem de 'não há notificações'
                     $('table.tab_cadre_fixehov').replaceWith(
-                    \"<div class='alert alert-info'>" . __("Não há novas notificações", "ticketanswers") . "</div>\"
+                    \"<div class='alert alert-info'>Não há novas notificações</div>\"
                     );
                 }
                 
@@ -254,7 +254,7 @@ function assignTicketToMe(ticketId) {
         return;
     }
     
-    if (confirm('" . __("Deseja realmente assumir este chamado?", "ticketanswers") . "')) {
+    if (confirm('Deseja realmente assumir este chamado?')) {
         $.ajax({
             url: '../ajax/assign_ticket.php',
             type: 'POST',
@@ -274,24 +274,24 @@ function assignTicketToMe(ticketId) {
                         if ($('table.tab_cadre_fixehov tr').length <= 1) {
                             // Se só sobrou o cabeçalho, mostrar mensagem de 'não há notificações'
                             $('table.tab_cadre_fixehov').replaceWith(
-                                \"<div class='alert alert-info'>" . __("Não há novas notificações", "ticketanswers") . "</div>\"
+                                \"<div class='alert alert-info'>Não há novas notificações</div>\"
                             );
                         }
                     });
                     
                     // Mostrar mensagem de sucesso
-                    alert(response.message || '" . __("Chamado assumido com sucesso!", "ticketanswers") . "');
+                    alert(response.message || 'Chamado assumido com sucesso!');
                     
                     // Redirecionar para a página do ticket
                     window.location.href = CFG_GLPI.root_doc + '/front/ticket.form.php?id=' + ticketId;
                 } else {
-                    alert(response.message || '" . __("Erro ao assumir o chamado.", "ticketanswers") . "');
+                    alert(response.message || 'Erro ao assumir o chamado.');
                 }
             },
             error: function(xhr, status, error) {
                 console.error('Erro AJAX:', status, error);
                 console.log('Resposta:', xhr.responseText);
-                alert('" . __("Erro ao comunicar com o servidor:", "ticketanswers") . " ' + error);
+                alert('Erro ao comunicar com o servidor: ' + error);
             }
         });
     }
@@ -300,11 +300,14 @@ function assignTicketToMe(ticketId) {
 </script>";
 
 echo "<div class='center'>";
-echo "<h1>" . __("Ticket Answers", "ticketanswers") . "</h1>";
+echo "<h1>Ticket Answers</h1>";
 
 
 // Obtém o ID do usuário logado
 $users_id = Session::getLoginUserID();
+
+// Declarar variável global do banco de dados
+global $DB;
 
 // Consulta base sem LIMIT e sem ORDER BY
 $combined_query_base = "(
@@ -855,22 +858,22 @@ LIMIT $notifications_per_page";
 
 
 // Executar a consulta de contagem
-$count_result = $DB->query($count_query);
+$count_result = $DB->doQuery($count_query);
 $total_notifications = 0;
-if ($count_result && $DB->numrows($count_result) > 0) {
-    $total_data = $DB->fetchAssoc($count_result);
+if ($count_result && $count_result->num_rows > 0) {
+    $total_data = $count_result->fetch_assoc();
     $total_notifications = $total_data['total'];
 }
 
 // Executar a consulta principal
-$result = $DB->query($combined_query);
-$numNotifications = $DB->numrows($result);
+$result = $DB->doQuery($combined_query);
+$numNotifications = $result->num_rows;
 
 // Log para depuração
 error_log("DEBUG: notifications_per_page=$notifications_per_page, total_notifications=$total_notifications, numNotifications=$numNotifications");
 
 echo "<div id='ticket-notifications'>";
-echo "<h2>" . __("Notificações", "ticketanswers") . "</h2>";
+echo "<h2>Notificações</h2>";
 echo "<script>
 document.addEventListener('DOMContentLoaded', function() {
     // Buscar a contagem atual das notificações via AJAX
@@ -903,13 +906,13 @@ if ($result && $numNotifications > 0) {
     // Adiciona o botão "Marcar todos como lido" no topo da tabela
     /*echo "<div class='center' style='margin-bottom: 15px;'>";
     echo "<a href='javascript:void(0)' onclick='markAllAsRead()' class='btn btn-warning'>
-            <i class='fas fa-check-double'></i> " . __("Marcar todos como lido", "ticketanswers") . "
+            <i class='fas fa-check-double'></i> Marcar todos como lido
           </a>";*/
     
     // Adicionar seletor de quantidade por página
     echo "<div style='margin: 10px auto; text-align: center; display: flex; justify-content: center; align-items: center;'>";
     echo "<form method='get' action='' style='display: flex; align-items: center;'>";
-    echo "<label for='per_page' style='margin-right: 10px;'>" . __("Notificações por página:", "ticketanswers") . "</label>";
+    echo "<label for='per_page' style='margin-right: 10px;'>Notificações por página:</label>";
     echo "<select name='per_page' id='per_page' class='form-control' style='width: 80px;' onchange='this.form.submit()'>";
     foreach ([10, 50, 100, 150, 200] as $value) {
         $selected = ($value == $notifications_per_page) ? "selected" : "";
@@ -922,17 +925,17 @@ if ($result && $numNotifications > 0) {
     
     echo "<table class='tab_cadre_fixehov'>";
     echo "<tr>";
-    echo "<th>" . __("Ticket", "ticketanswers") . "</th>";
-    echo "<th>" . __("Nº do Chamado", "ticketanswers") . "</th>";
-    echo "<th>" . __("Data", "ticketanswers") . "</th>";
-    echo "<th>" . __("Tipo", "ticketanswers") . "</th>";
-    echo "<th>" . __("Usuário/Grupo", "ticketanswers") . "</th>";
-    echo "<th>" . __("Conteúdo", "ticketanswers") . "</th>";
-    echo "<th>" . __("Ações", "ticketanswers") . "</th>";
+    echo "<th>Ticket</th>";
+    echo "<th>Nº do Chamado</th>";
+    echo "<th>Data</th>";
+    echo "<th>Tipo</th>";
+    echo "<th>Usuário/Grupo</th>";
+    echo "<th>Conteúdo</th>";
+    echo "<th>Ações</th>";
     echo "</tr>";
     
     $i = 0;
-    while ($data = $DB->fetchAssoc($result)) {
+    while ($data = $result->fetch_assoc()) {
         $notification_type = $data['notification_type'];
         // Determinar o ID da linha para cada tipo de notificação
 $row_id = "";
@@ -977,76 +980,76 @@ echo "<td>";
 switch ($notification_type) {
     // Tipos de Resposta/Interação
     case 'followup':
-        echo "<span class='badge bg-info text-white'>" . __("Resposta", "ticketanswers") . "</span>";
+        echo "<span class='badge bg-info text-white'>Resposta</span>";
         break;
     case 'refused':
-        echo "<span class='badge bg-danger text-white'>" . __("Recusado", "ticketanswers") . "</span>";
+        echo "<span class='badge bg-danger text-white'>Recusado</span>";
         break;
     
     // Tipos de Atribuição
     case 'group':
-        echo "<span class='badge bg-success text-white'>" . __("Novo chamado", "ticketanswers") . "</span>";
+        echo "<span class='badge bg-success text-white'>Novo chamado</span>";
         break;
     case 'assigned':
-        echo "<span class='badge bg-warning text-white'>" . __("Atribuído", "ticketanswers") . "</span>";
+        echo "<span class='badge bg-warning text-white'>Atribuído</span>";
         break;
     
     // Tipos de Observador
     case 'observer':
-        echo "<span class='badge bg-primary text-white'>" . __("Observador", "ticketanswers") . "</span>";
+        echo "<span class='badge bg-primary text-white'>Observador</span>";
         break;
     case 'group_observer':
-        echo "<span class='badge bg-primary text-white'>" . __("Grupo observador", "ticketanswers") . "</span>";
+        echo "<span class='badge bg-primary text-white'>" . "Grupo observador" . "</span>";
         break;
     
     // Tipos de Validação
     case 'validation':
-        echo "<span class='badge bg-warning text-white'>" . __("Validação", "ticketanswers") . "</span>";
+        echo "<span class='badge bg-warning text-white'>" . "Validação" . "</span>";
         break;
     case 'validation_request':
-        echo "<span class='badge bg-info text-white'>" . __("Solicitação de Validação", "ticketanswers") . "</span>";
+        echo "<span class='badge bg-info text-white'>" . "Solicitação de Validação" . "</span>";
         break;
     case 'validation_request_response':
         // Verificar se a validação foi aprovada ou recusada
         $validation_status = isset($data['validation_status']) ? $data['validation_status'] : 0;
         if ($validation_status == 3) { // Aprovado
-            echo "<span class='badge bg-success text-white'>" . __("Validação Aprovada", "ticketanswers") . "</span>";
+            echo "<span class='badge bg-success text-white'>" . "Validação Aprovada" . "</span>";
         } else if ($validation_status == 4) { // Recusado
-            echo "<span class='badge bg-danger text-white'>" . __("Validação Recusada", "ticketanswers") . "</span>";
+            echo "<span class='badge bg-danger text-white'>" . "Validação Recusada" . "</span>";
         } else {
-            echo "<span class='badge bg-secondary text-white'>" . __("Resp. Validação", "ticketanswers") . "</span>";
+            echo "<span class='badge bg-secondary text-white'>" . "Resp. Validação" . "</span>";
         }
         break;
     case 'validation_response':
         // Verificar se a validação foi aprovada ou recusada
         $validation_status = isset($data['validation_status']) ? $data['validation_status'] : 0;
         if ($validation_status == 3) { // Aprovado
-            echo "<span class='badge bg-success text-white'>" . __("Validação Aprovada", "ticketanswers") . "</span>";
+            echo "<span class='badge bg-success text-white'>" . "Validação Aprovada" . "</span>";
         } else if ($validation_status == 4) { // Recusado
-            echo "<span class='badge bg-danger text-white'>" . __("Validação Recusada", "ticketanswers") . "</span>";
+            echo "<span class='badge bg-danger text-white'>" . "Validação Recusada" . "</span>";
         } else {
-            echo "<span class='badge bg-secondary text-white'>" . __("Resp. Validação", "ticketanswers") . "</span>";
+            echo "<span class='badge bg-secondary text-white'>" . "Resp. Validação" . "</span>";
         }
         break;
     case 'validation_approved':
-        echo "<span class='badge bg-success text-white'>" . __("Validação Aprovada", "ticketanswers") . "</span>";
+        echo "<span class='badge bg-success text-white'>" . "Validação Aprovada" . "</span>";
         break;
     case 'validation_refused':
-        echo "<span class='badge bg-danger text-white'>" . __("Validação Recusada", "ticketanswers") . "</span>";
+        echo "<span class='badge bg-danger text-white'>" . "Validação Recusada" . "</span>";
         break;
     
      // Adicionar os novos tipos de notificação
      case 'technician_response':
-        echo "<span class='badge bg-secondary text-white'>" . __("Resposta técnica", "ticketanswers") . "</span>";
+        echo "<span class='badge bg-secondary text-white'>" . "Resposta técnica" . "</span>";
         break;
     case 'status_change':
-        echo "<span class='badge bg-primary text-white'>" . __("Status do chamado", "ticketanswers") . "</span>";
+        echo "<span class='badge bg-primary text-white'>" . "Status do chamado" . "</span>";
         break;
     case 'pending_reason':
-        echo "<span class='badge bg-warning text-white'>" . __("Pendente", "ticketanswers") . "</span>";
+        echo "<span class='badge bg-warning text-white'>" . "Pendente" . "</span>";
         break;
     default:
-        echo "<span class='badge bg-secondary text-white'>" . __("Outro", "ticketanswers") . "</span>";
+        echo "<span class='badge bg-secondary text-white'>" . "Outro" . "</span>";
 }
 echo "</td>";
 
@@ -1056,23 +1059,23 @@ echo "<td>";
 if ($notification_type == 'followup') {
     echo $data['user_name']; // Nome do usuário que respondeu
 } elseif ($notification_type == 'group' || $notification_type == 'group_observer') {
-    echo $data['user_name'] . " <small>(" . __("para grupo", "ticketanswers") . ": " . $data['group_name'] . ")</small>";
+    echo $data['user_name'] . " <small>(" . "para grupo" . ": " . $data['group_name'] . ")</small>";
 } elseif ($notification_type == 'refused') {
-    echo $data['user_name'] . " <small>(" . __("recusou o chamado", "ticketanswers") . ")</small>";
+    echo $data['user_name'] . " <small>(" . "recusou o chamado" . ")</small>";
 } elseif ($notification_type == 'validation' || $notification_type == 'validation_request') {
-    echo $data['user_name'] . " <small>(" . __("solicitou validação", "ticketanswers") . ")</small>";
+    echo $data['user_name'] . " <small>(" . "solicitou validação" . ")</small>";
 } elseif ($notification_type == 'validation_approved' || 
          ($notification_type == 'validation_request_response' && isset($data['validation_status']) && $data['validation_status'] == 3) ||
          ($notification_type == 'validation_response' && isset($data['validation_status']) && $data['validation_status'] == 3)) {
-    echo $data['user_name'] . " <small>(" . __("aprovou a validação", "ticketanswers") . ")</small>";
+    echo $data['user_name'] . " <small>(" . "aprovou a validação" . ")</small>";
 } elseif ($notification_type == 'validation_refused' || 
          ($notification_type == 'validation_request_response' && isset($data['validation_status']) && $data['validation_status'] == 4) ||
          ($notification_type == 'validation_response' && isset($data['validation_status']) && $data['validation_status'] == 4)) {
-    echo $data['user_name'] . " <small>(" . __("recusou a validação", "ticketanswers") . ")</small>";
+    echo $data['user_name'] . " <small>(" . "recusou a validação" . ")</small>";
 } elseif ($notification_type == 'validation_request_response') {
-    echo $data['user_name'] . " <small>(" . __("respondeu sua solicitação de validação", "ticketanswers") . ")</small>";
+    echo $data['user_name'] . " <small>(" . "respondeu sua solicitação de validação" . ")</small>";
 } elseif ($notification_type == 'validation_response') {
-    echo $data['user_name'] . " <small>(" . __("respondeu à validação", "ticketanswers") . ")</small>";
+    echo $data['user_name'] . " <small>(" . "respondeu à validação" . ")</small>";
 } else {
     echo $data['user_name'];
 }
@@ -1085,7 +1088,7 @@ if ($notification_type == 'refused' && !empty($data['refuse_reason'])) {
     $refuse_content = $data['refuse_reason'];
     $decoded_content = html_entity_decode($refuse_content);
     $plain_text = preg_replace('/<.*?>/', '', $decoded_content);
-    echo "<strong>" . __("Motivo da recusa", "ticketanswers") . ":</strong> ";
+    echo "<strong>" . "Motivo da recusa" . ":</strong> ";
     echo Html::resume_text($plain_text, 100);
 } elseif ($notification_type == 'followup') {
     // Decodificar entidades HTML
@@ -1105,18 +1108,18 @@ if ($notification_type == 'refused' && !empty($data['refuse_reason'])) {
         
         // Determinar o prefixo apropriado baseado no tipo
         if ($notification_type == 'validation' || $notification_type == 'validation_request') {
-            echo "<strong>" . __("Solicitação:", "ticketanswers") . "</strong> ";
+            echo "<strong>" . "Solicitação:" . "</strong> ";
         } elseif ($notification_type == 'validation_approved') {
-            echo "<strong>" . __("Aprovação:", "ticketanswers") . "</strong> ";
+            echo "<strong>" . "Aprovação:" . "</strong> ";
         } elseif ($notification_type == 'validation_refused') {
-            echo "<strong>" . __("Recusa:", "ticketanswers") . "</strong> ";
+            echo "<strong>" . "Recusa:" . "</strong> ";
         } elseif ($notification_type == 'validation_response' || $notification_type == 'validation_request_response') {
-            echo "<strong>" . __("Resposta:", "ticketanswers") . "</strong> ";
+            echo "<strong>" . "Resposta:" . "</strong> ";
         }
         
         echo Html::resume_text($plain_text, 100);
     } else {
-        echo __("Sem conteúdo disponível", "ticketanswers");
+        echo "Sem conteúdo disponível";
     }
 } else {
     // Para outros tipos, mostrar um resumo do conteúdo do ticket
@@ -1133,23 +1136,23 @@ echo "</td>";
             switch ($notification_type) {
                 case 'followup':
                     // Link para ver na mesma aba - Usar a função unificada
-                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"followup\", false)' class='btn btn-info' title='" . __("Ver chamado", "ticketanswers") . "'>
+                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"followup\", false)' class='btn btn-info' title='" . "Ver chamado" . "'>
                     <i class='fas fa-eye'></i>
                   </a>";
                     // Link para ver em nova aba
-                    echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"followup\", true); return false;' class='btn btn-secondary' title='" . __("Ver em nova aba", "ticketanswers") . "'>
+                    echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"followup\", true); return false;' class='btn btn-secondary' title='" . "Ver em nova aba" . "'>
                     <i class='fas fa-external-link-alt'></i>
                   </a>";
                     break;
                 
                 case 'group':
                     // Link para ver na mesma aba - Usar função unificada
-                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", 0, \"group\", false)' class='btn btn-info' title='" . __("Ver chamado", "ticketanswers") . "'>
+                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", 0, \"group\", false)' class='btn btn-info' title='" . "Ver chamado" . "'>
                     <i class='fas fa-eye'></i>
                   </a>";
                     
                     // Botão para assumir o chamado
-                    echo "<a href='javascript:void(0)' onclick='assignTicketToMe(" . $data['ticket_id'] . ")' class='btn btn-success' title='" . __("Assumir chamado", "ticketanswers") . "'>
+                    echo "<a href='javascript:void(0)' onclick='assignTicketToMe(" . $data['ticket_id'] . ")' class='btn btn-success' title='" . "Assumir chamado" . "'>
                     <i class='fas fa-user-check'></i>
                   </a>";
                     break;
@@ -1157,66 +1160,66 @@ echo "</td>";
                 case 'observer':
                 case 'group_observer':
                     // Link para ver na mesma aba
-                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", 0, \"" . $notification_type . "\", false)' class='btn btn-info' title='" . __("Ver chamado", "ticketanswers") . "'>
+                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", 0, \"" . $notification_type . "\", false)' class='btn btn-info' title='" . "Ver chamado" . "'>
                     <i class='fas fa-eye'></i>
                   </a>";
                     // Link para ver em nova aba - CORREÇÃO
-                    echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", 0, \"" . $notification_type . "\", true); return false;' class='btn btn-secondary' title='" . __("Ver em nova aba", "ticketanswers") . "'>
+                    echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", 0, \"" . $notification_type . "\", true); return false;' class='btn btn-secondary' title='" . "Ver em nova aba" . "'>
                     <i class='fas fa-external-link-alt'></i>
                   </a>";
                     break;
                     
                 case 'refused':
                     // Link para ver na mesma aba
-                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"refused\", false)' class='btn btn-info' title='" . __("Ver chamado", "ticketanswers") . "'>
+                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"refused\", false)' class='btn btn-info' title='" . "Ver chamado" . "'>
                     <i class='fas fa-eye'></i>
                   </a>";
                     // Link para ver em nova aba
-                    echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"followup\", true); return false;' class='btn btn-secondary' title='" . __("Ver em nova aba", "ticketanswers") . "'>
+                    echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"followup\", true); return false;' class='btn btn-secondary' title='" . "Ver em nova aba" . "'>
                     <i class='fas fa-external-link-alt'></i>
                   </a>";
                     break;
                     
                 case 'assigned':
                     // Link para ver na mesma aba
-                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", 0, \"assigned\", false)' class='btn btn-info' title='" . __("Ver chamado", "ticketanswers") . "'>
+                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", 0, \"assigned\", false)' class='btn btn-info' title='" . "Ver chamado" . "'>
                     <i class='fas fa-eye'></i>
                   </a>";
                     // Link para ver em nova aba
-                    echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", 0, \"assigned\", true); return false;' class='btn btn-secondary' title='" . __("Ver em nova aba", "ticketanswers") . "'>
+                    echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", 0, \"assigned\", true); return false;' class='btn btn-secondary' title='" . "Ver em nova aba" . "'>
                     <i class='fas fa-external-link-alt'></i>
                   </a>";
                     break;
 
                 case 'validation':
                     // Link para ver na mesma aba
-                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"validation\", false)' class='btn btn-info' title='" . __("Ver chamado", "ticketanswers") . "'>
+                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"validation\", false)' class='btn btn-info' title='" . "Ver chamado" . "'>
                     <i class='fas fa-eye'></i>
                   </a>";
                     // Link para ver em nova aba
-                    echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"validation\", true); return false;' class='btn btn-secondary' title='" . __("Ver em nova aba", "ticketanswers") . "'>
+                    echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"validation\", true); return false;' class='btn btn-secondary' title='" . "Ver em nova aba" . "'>
                     <i class='fas fa-external-link-alt'></i>
                   </a>";
                     break;
                 
                 case 'validation_request':
                     // Link para ver na mesma aba
-                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"validation_request\", false)' class='btn btn-info' title='" . __("Ver chamado", "ticketanswers") . "'>
+                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"validation_request\", false)' class='btn btn-info' title='" . "Ver chamado" . "'>
                     <i class='fas fa-eye'></i>
                   </a>";
                     // Link para ver em nova aba
-                    echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"validation_request\", true); return false;' class='btn btn-secondary' title='" . __("Ver em nova aba", "ticketanswers") . "'>
+                    echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"validation_request\", true); return false;' class='btn btn-secondary' title='" . "Ver em nova aba" . "'>
                     <i class='fas fa-external-link-alt'></i>
                   </a>";
                     break;
                 case 'validation_approved':
                 case 'validation_refused':
                     // Link para ver na mesma aba
-                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"" . $notification_type . "\", false)' class='btn btn-info' title='" . __("Ver chamado", "ticketanswers") . "'>
+                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"" . $notification_type . "\", false)' class='btn btn-info' title='" . "Ver chamado" . "'>
                     <i class='fas fa-eye'></i>
                   </a>";
                     // Link para ver em nova aba
-                        echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"" . $notification_type . "\", true); return false;' class='btn btn-secondary' title='" . __("Ver em nova aba", "ticketanswers") . "'>
+                        echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"" . $notification_type . "\", true); return false;' class='btn btn-secondary' title='" . "Ver em nova aba" . "'>
                         <i class='fas fa-external-link-alt'></i>
                       </a>";
                         break;
@@ -1224,11 +1227,11 @@ echo "</td>";
                 case 'status_change':
                 case 'pending_reason':
                     // Link para ver na mesma aba
-                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"" . $notification_type . "\", false)' class='btn btn-info' title='" . __("Ver chamado", "ticketanswers") . "'>
+                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"" . $notification_type . "\", false)' class='btn btn-info' title='" . "Ver chamado" . "'>
                     <i class='fas fa-eye'></i>
                       </a>";
                     // Link para ver em nova aba
-                    echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"" . $notification_type . "\", true); return false;' class='btn btn-secondary' title='" . __("Ver em nova aba", "ticketanswers") . "'>
+                    echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"" . $notification_type . "\", true); return false;' class='btn btn-secondary' title='" . "Ver em nova aba" . "'>
                     <i class='fas fa-external-link-alt'></i>
                       </a>";
                       break;
@@ -1243,10 +1246,10 @@ echo "</td>";
         
         // Adicionar informação de paginação e seletor no final
         echo "<div style='margin: 20px auto; text-align: center;'>";
-        echo "<p>" . sprintf(__("Exibindo %d de %d notificações", "ticketanswers"), min($numNotifications, $notifications_per_page), $total_notifications) . "</p>";
+        echo "<p>" . sprintf("Exibindo %d de %d notificações", min($numNotifications, $notifications_per_page), $total_notifications) . "</p>";
         echo "<div style='display: flex; justify-content: center; align-items: center;'>";
         echo "<form method='get' action='' style='display: flex; align-items: center;'>";
-        echo "<label for='per_page_bottom' style='margin-right: 10px;'>" . __("Notificações por página:", "ticketanswers") . "</label>";
+        echo "<label for='per_page_bottom' style='margin-right: 10px;'>" . "Notificações por página:" . "</label>";
         echo "<select name='per_page' id='per_page_bottom' class='form-control' style='width: 80px;' onchange='this.form.submit()'>";
         foreach ([10, 50, 100, 150, 200] as $value) {
             $selected = ($value == $notifications_per_page) ? "selected" : "";
@@ -1257,7 +1260,7 @@ echo "</td>";
         echo "</div>";
         echo "</div>";
     } else {
-        echo "<div class='alert alert-info'>" . __("Não há novas notificações", "ticketanswers") . "</div>";
+        echo "<div class='alert alert-info'>" . "Não há novas notificações" . "</div>";
     }
     
     echo "</div>"; // Fim do container de notificações

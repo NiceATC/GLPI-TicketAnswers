@@ -27,9 +27,15 @@ O Plugin Ticket Answers para GLPI foi desenvolvido para otimizar o gerenciamento
 
 ## **Requisitos do Sistema**
 
-* **GLPI:** Compatível com versões 10.0.0 a 10.0.18.
-* **PHP:** Versão mínima recomendada 7.4.
-* **Banco de Dados:** MySQL/MariaDB.
+* **GLPI:** Versão 11.0 ou superior.
+* **PHP:** Versão mínima recomendada 8.1.
+* **Banco de Dados:** MySQL 8.0+ ou MariaDB 10.5+.
+
+## **Compatibilidade**
+
+* ✅ **GLPI 11.x** - Totalmente compatível
+* ⚠️ **GLPI 10.x** - Use a versão 1.x do plugin
+* ❌ **GLPI 9.5 e anteriores** - Não compatível com esta versão
 
 ## **Instalação**
 

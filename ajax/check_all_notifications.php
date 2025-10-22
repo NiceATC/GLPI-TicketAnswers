@@ -4,12 +4,15 @@ include ("../../../inc/includes.php");
 
 Session::checkLoginUser();
 
+// Declarar variável global do banco de dados
+global $DB;
+
 // Obtém o ID do usuário logado
 $users_id = Session::getLoginUserID();
 
 // Obter preferências de notificação do usuário
 $query = "SELECT * FROM glpi_plugin_ticketanswers_notification_prefs WHERE users_id = $users_id";
-$result = $DB->query($query);
+$result = $DB->doQuery($query);
 
 // Valores padrão (todos habilitados)
 $user_prefs = [
@@ -22,8 +25,8 @@ $user_prefs = [
 ];
 
 // Se o usuário já tem preferências, usar as dele
-if ($result && $DB->numrows($result) > 0) {
-    $data = $DB->fetchAssoc($result);
+if ($result && $result->num_rows > 0) {
+    $data = $result->fetch_assoc();
     $user_prefs = [
         'followup' => (int)$data['followup'],
         'refused' => (int)$data['refused'],
@@ -261,9 +264,9 @@ WHERE
 
 
 // Executar as novas consultas
-$technician_response_result = $DB->query($technician_response_query);
-$status_change_result = $DB->query($status_change_query);
-$pending_reason_result = $DB->query($pending_reason_query);
+$technician_response_result = $DB->doQuery($technician_response_query);
+$status_change_result = $DB->doQuery($status_change_query);
+$pending_reason_result = $DB->doQuery($pending_reason_query);
 
 // Inicializar os novos contadores
 $technician_response_count = 0;
@@ -271,45 +274,45 @@ $status_change_count = 0;
 $pending_reason_count = 0;
 
 // Obter os resultados das novas contagens
-if ($technician_response_result && $DB->numrows($technician_response_result) > 0) {
-    $technician_response_data = $DB->fetchAssoc($technician_response_result);
+if ($technician_response_result && $technician_response_result->num_rows > 0) {
+    $technician_response_data = $technician_response_result->fetch_assoc();
     $technician_response_count = $technician_response_data['technician_response_count'];
 }
 
-if ($status_change_result && $DB->numrows($status_change_result) > 0) {
-    $status_change_data = $DB->fetchAssoc($status_change_result);
+if ($status_change_result && $status_change_result->num_rows > 0) {
+    $status_change_data = $status_change_result->fetch_assoc();
     $status_change_count = $status_change_data['status_change_count'];
 }
 
-if ($pending_reason_result && $DB->numrows($pending_reason_result) > 0) {
-    $pending_reason_data = $DB->fetchAssoc($pending_reason_result);
+if ($pending_reason_result && $pending_reason_result->num_rows > 0) {
+    $pending_reason_data = $pending_reason_result->fetch_assoc();
     $pending_reason_count = $pending_reason_data['pending_reason_count'];
 }
 
 
 
 // Executar as consultas de validação
-$validation_result = $DB->query($validation_query);
-$validation_response_result = $DB->query($validation_response_query);
-$validation_request_response_result = $DB->query($validation_request_response_query);
+$validation_result = $DB->doQuery($validation_query);
+$validation_response_result = $DB->doQuery($validation_response_query);
+$validation_request_response_result = $DB->doQuery($validation_request_response_query);
 
 // Obter os resultados
 $validation_count = 0;
 $validation_response_count = 0;
 $validation_request_response_count = 0;
 
-if ($validation_result && $DB->numrows($validation_result) > 0) {
-    $validation_data = $DB->fetchAssoc($validation_result);
+if ($validation_result && $validation_result->num_rows > 0) {
+    $validation_data = $validation_result->fetch_assoc();
     $validation_count = $validation_data['validation_count'];
 }
 
-if ($validation_response_result && $DB->numrows($validation_response_result) > 0) {
-    $validation_response_data = $DB->fetchAssoc($validation_response_result);
+if ($validation_response_result && $validation_response_result->num_rows > 0) {
+    $validation_response_data = $validation_response_result->fetch_assoc();
     $validation_response_count = $validation_response_data['validation_response_count'];
 }
 
-if ($validation_request_response_result && $DB->numrows($validation_request_response_result) > 0) {
-    $validation_request_response_data = $DB->fetchAssoc($validation_request_response_result);
+if ($validation_request_response_result && $validation_request_response_result->num_rows > 0) {
+    $validation_request_response_data = $validation_request_response_result->fetch_assoc();
     $validation_request_response_count = $validation_request_response_data['validation_request_response_count'];
 }
 
@@ -325,12 +328,12 @@ if ($since > 0) {
 }
 
 // Executar as consultas
-$followup_result = $DB->query($followup_query);
-$refused_result = $DB->query($refused_query);
-$group_result = $DB->query($group_query);
-$observer_result = $DB->query($observer_query);
-$group_observer_result = $DB->query($group_observer_query);
-$assigned_tech_result = $DB->query($assigned_tech_query);
+$followup_result = $DB->doQuery($followup_query);
+$refused_result = $DB->doQuery($refused_query);
+$group_result = $DB->doQuery($group_query);
+$observer_result = $DB->doQuery($observer_query);
+$group_observer_result = $DB->doQuery($group_observer_query);
+$assigned_tech_result = $DB->doQuery($assigned_tech_query);
 
 // Inicializar contadores
 $followup_count = 0;
@@ -346,33 +349,33 @@ $status_change_count = 0;
 $pending_reason_count = 0;
 
 // Obter os resultados das contagens
-if ($followup_result && $DB->numrows($followup_result) > 0) {
-    $followup_data = $DB->fetchAssoc($followup_result);
+if ($followup_result && $followup_result->num_rows > 0) {
+    $followup_data = $followup_result->fetch_assoc();
     $followup_count = $followup_data['followup_count'];
 }
 
-if ($refused_result && $DB->numrows($refused_result) > 0) {
-    $refused_data = $DB->fetchAssoc($refused_result);
+if ($refused_result && $refused_result->num_rows > 0) {
+    $refused_data = $refused_result->fetch_assoc();
     $refused_count = $refused_data['refused_count'];
 }
 
-if ($group_result && $DB->numrows($group_result) > 0) {
-    $group_data = $DB->fetchAssoc($group_result);
+if ($group_result && $group_result->num_rows > 0) {
+    $group_data = $group_result->fetch_assoc();
     $group_count = $group_data['group_count'];
 }
 
-if ($observer_result && $DB->numrows($observer_result) > 0) {
-    $observer_data = $DB->fetchAssoc($observer_result);
+if ($observer_result && $observer_result->num_rows > 0) {
+    $observer_data = $observer_result->fetch_assoc();
     $observer_count = $observer_data['observer_count'];
 }
 
-if ($group_observer_result && $DB->numrows($group_observer_result) > 0) {
-    $group_observer_data = $DB->fetchAssoc($group_observer_result);
+if ($group_observer_result && $group_observer_result->num_rows > 0) {
+    $group_observer_data = $group_observer_result->fetch_assoc();
     $group_observer_count = $group_observer_data['group_observer_count'];
 }
 
-if ($assigned_tech_result && $DB->numrows($assigned_tech_result) > 0) {
-    $assigned_tech_data = $DB->fetchAssoc($assigned_tech_result);
+if ($assigned_tech_result && $assigned_tech_result->num_rows > 0) {
+    $assigned_tech_data = $assigned_tech_result->fetch_assoc();
     $assigned_tech_count = $assigned_tech_data['assigned_tech_count'];
 }
 
@@ -391,9 +394,9 @@ $force_validation_sql = "SELECT COUNT(DISTINCT tv.id) as direct_count
                             AND t.status != 6
                             AND v.id IS NULL";
 
-$force_result = $DB->query($force_validation_sql);
-if ($force_result && $DB->numrows($force_result) > 0) {
-    $force_data = $DB->fetchAssoc($force_result);
+$force_result = $DB->doQuery($force_validation_sql);
+if ($force_result && $force_result->num_rows > 0) {
+    $force_data = $force_result->fetch_assoc();
     $direct_count = intval($force_data['direct_count']);
     
     // Sobrescrever diretamente o contador de validação com o valor correto
@@ -417,9 +420,9 @@ $force_observer_sql = "SELECT COUNT(DISTINCT t.id) as direct_count
                           v.id IS NULL
                           AND t.status IN (1, 2, 3, 4)";  // Incluindo status 3 e 4 também
 
-$force_observer_result = $DB->query($force_observer_sql);
-if ($force_observer_result && $DB->numrows($force_observer_result) > 0) {
-    $force_observer_data = $DB->fetchAssoc($force_observer_result);
+$force_observer_result = $DB->doQuery($force_observer_sql);
+if ($force_observer_result && $force_observer_result->num_rows > 0) {
+    $force_observer_data = $force_observer_result->fetch_assoc();
     $direct_observer_count = intval($force_observer_data['direct_count']);
     
     // Sobrescrever diretamente o contador de observador com o valor correto
@@ -447,9 +450,9 @@ $force_status_change_sql = "SELECT COUNT(DISTINCT t.id) as direct_count
                                AND t.status IN (2, 4, 5)  -- Em atendimento, Pendente, Solucionado
                                AND t.date_mod > DATE_SUB(NOW(), INTERVAL 7 DAY)";
 
-$force_status_result = $DB->query($force_status_change_sql);
-if ($force_status_result && $DB->numrows($force_status_result) > 0) {
-    $force_status_data = $DB->fetchAssoc($force_status_result);
+$force_status_result = $DB->doQuery($force_status_change_sql);
+if ($force_status_result && $force_status_result->num_rows > 0) {
+    $force_status_data = $force_status_result->fetch_assoc();
     $direct_status_count = intval($force_status_data['direct_count']);
     
     // Sobrescrever diretamente o contador de mudanças de status
@@ -757,11 +760,11 @@ $unified_count_query = "SELECT COUNT(*) as total FROM (
     GROUP BY ticket_id, type
 ) AS unique_notifications";
 
-$unified_count_result = $DB->query($unified_count_query);
+$unified_count_result = $DB->doQuery($unified_count_query);
 $total_count_unified = 0;
 
-if ($unified_count_result && $DB->numrows($unified_count_result) > 0) {
-    $unified_count_data = $DB->fetchAssoc($unified_count_result);
+if ($unified_count_result && $unified_count_result->num_rows > 0) {
+    $unified_count_data = $unified_count_result->fetch_assoc();
     $total_count_unified = $unified_count_data['total'];
 }
 
@@ -833,10 +836,10 @@ AND v.id IS NULL
 ORDER BY tv.submission_date DESC
 LIMIT 10";
 
-$validation_details_result = $DB->query($validation_details_query);
+$validation_details_result = $DB->doQuery($validation_details_query);
 $validation_notifications = [];
 
-while ($data = $DB->fetchAssoc($validation_details_result)) {
+while ($data = $validation_details_result->fetch_assoc()) {
 $validation_notifications[] = [
     'ticket_id' => $data['ticket_id'],
     'ticket_name' => $data['ticket_name'],
@@ -883,10 +886,10 @@ AND tv.validation_date > DATE_SUB(NOW(), INTERVAL 30 DAY)
 ORDER BY tv.validation_date DESC
 LIMIT 10";
 
-$validation_response_details_result = $DB->query($validation_response_details_query);
+$validation_response_details_result = $DB->doQuery($validation_response_details_query);
 $validation_response_notifications = [];
 
-while ($data = $DB->fetchAssoc($validation_response_details_result)) {
+while ($data = $validation_response_details_result->fetch_assoc()) {
 $validation_response_notifications[] = [
     'ticket_id' => $data['ticket_id'],
     'ticket_name' => $data['ticket_name'],
@@ -934,10 +937,10 @@ AND tv.validation_date > DATE_SUB(NOW(), INTERVAL 30 DAY)
 ORDER BY tv.validation_date DESC
 LIMIT 10";
 
-$validation_response_details_result = $DB->query($validation_response_details_query);
+$validation_response_details_result = $DB->doQuery($validation_response_details_query);
 $validation_response_notifications = [];
 
-while ($data = $DB->fetchAssoc($validation_response_details_result)) {
+while ($data = $validation_response_details_result->fetch_assoc()) {
 $validation_response_notifications[] = [
     'ticket_id' => $data['ticket_id'],
     'ticket_name' => $data['ticket_name'],
@@ -978,10 +981,10 @@ $validation_response_notifications[] = [
     ORDER BY t.date_creation DESC
     LIMIT 10";
     
-    $group_details_result = $DB->query($group_details_query);
+    $group_details_result = $DB->doQuery($group_details_query);
     $group_notifications = [];
     
-    while ($data = $DB->fetchAssoc($group_details_result)) {
+    while ($data = $group_details_result->fetch_assoc()) {
         // Decodificar entidades HTML para o conteúdo do ticket
         $ticket_content = $data['ticket_content'];
         $decoded_content = html_entity_decode($ticket_content);
@@ -1026,10 +1029,10 @@ $validation_response_notifications[] = [
     ORDER BY t.date_creation DESC
     LIMIT 10";
     
-    $observer_details_result = $DB->query($observer_details_query);
+    $observer_details_result = $DB->doQuery($observer_details_query);
     $observer_notifications = [];
     
-    while ($data = $DB->fetchAssoc($observer_details_result)) {
+    while ($data = $observer_details_result->fetch_assoc()) {
         // Decodificar entidades HTML para o conteúdo do ticket
         $ticket_content = $data['ticket_content'];
         $decoded_content = html_entity_decode($ticket_content);
@@ -1077,10 +1080,10 @@ $validation_response_notifications[] = [
     ORDER BY its.date_approval DESC
     LIMIT 10";
     
-    $refused_details_result = $DB->query($refused_details_query);
+    $refused_details_result = $DB->doQuery($refused_details_query);
     $refused_notifications = [];
     
-    while ($data = $DB->fetchAssoc($refused_details_result)) {
+    while ($data = $refused_details_result->fetch_assoc()) {
         // Decodificar entidades HTML
         $followup_content = $data['followup_content'];
         $decoded_content = html_entity_decode($followup_content);
@@ -1102,8 +1105,8 @@ $validation_response_notifications[] = [
 
 
 // Obter os resultados das contagens após todas as consultas
-if ($followup_result && $DB->numrows($followup_result) > 0) {
-    $followup_data = $DB->fetchAssoc($followup_result);
+if ($followup_result && $followup_result->num_rows > 0) {
+    $followup_data = $followup_result->fetch_assoc();
     $followup_count = $followup_data['followup_count'];
 }
 
@@ -1130,10 +1133,10 @@ if ($followup_result && $DB->numrows($followup_result) > 0) {
     ORDER BY t.date_mod DESC
     LIMIT 10";
     
-    $assigned_tech_details_result = $DB->query($assigned_tech_details_query);
+    $assigned_tech_details_result = $DB->doQuery($assigned_tech_details_query);
     $assigned_tech_notifications = [];
     
-    while ($data = $DB->fetchAssoc($assigned_tech_details_result)) {
+    while ($data = $assigned_tech_details_result->fetch_assoc()) {
         // Decodificar entidades HTML para o conteúdo do ticket
         $ticket_content = $data['ticket_content'];
         $decoded_content = html_entity_decode($ticket_content);
@@ -1221,17 +1224,17 @@ $diagnostic_sql = "SELECT tv.id, t.name, tv.status, tv.submission_date, tv.users
                    ORDER BY tv.submission_date DESC
                    LIMIT 5";
 
-$result = $DB->query($diagnostic_sql);
+$result = $DB->doQuery($diagnostic_sql);
 error_log("=== DIAGNÓSTICO DE VALIDAÇÕES ===");
-if ($result && $DB->numrows($result) > 0) {
-    while ($row = $DB->fetchAssoc($result)) {
+if ($result && $result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
         error_log(json_encode($row));
         
         // Verificar se há um registro de visualização para esta validação
         $view_sql = "SELECT id FROM glpi_plugin_ticketanswers_views 
                      WHERE users_id = $users_id AND followup_id = {$row['id']}";
-        $view_result = $DB->query($view_sql);
-        $viewed = ($view_result && $DB->numrows($view_result) > 0) ? "SIM" : "NÃO";
+        $view_result = $DB->doQuery($view_sql);
+        $viewed = ($view_result && $view_result->num_rows > 0) ? "SIM" : "NÃO";
         error_log("Validação ID {$row['id']} já foi visualizada? $viewed");
     }
 } else {

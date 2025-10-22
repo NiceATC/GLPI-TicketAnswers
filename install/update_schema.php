@@ -3,8 +3,8 @@
 
 // Adicionar coluna ticket_id se não existir
 if (!$DB->fieldExists('glpi_plugin_ticketanswers_views', 'ticket_id')) {
-    $DB->query("ALTER TABLE `glpi_plugin_ticketanswers_views` 
-                ADD COLUMN `ticket_id` VARCHAR(255) NOT NULL `users_id`,
+    $DB->doQuery("ALTER TABLE `glpi_plugin_ticketanswers_views` 
+                ADD COLUMN `ticket_id` VARCHAR(255) NOT NULL AFTER `users_id`,
                 ADD INDEX `ticket_id` (`ticket_id`)");
     
     // Log da alteração
@@ -13,12 +13,12 @@ if (!$DB->fieldExists('glpi_plugin_ticketanswers_views', 'ticket_id')) {
 
 // Modificar a coluna followup_id para permitir NULL se necessário
 $query = "SHOW COLUMNS FROM `glpi_plugin_ticketanswers_views` LIKE 'followup_id'";
-$result = $DB->query($query);
-if ($result && $DB->numrows($result) > 0) {
-    $column_info = $DB->fetchAssoc($result);
+$result = $DB->doQuery($query);
+if ($result && $result->num_rows > 0) {
+    $column_info = $result->fetch_assoc();
     // Verificar se a coluna já permite NULL
     if (strpos(strtoupper($column_info['Null']), 'NO') !== false) {
-        $DB->query("ALTER TABLE `glpi_plugin_ticketanswers_views` 
+        $DB->doQuery("ALTER TABLE `glpi_plugin_ticketanswers_views` 
                     MODIFY COLUMN `followup_id` VARCHAR(255) NOT NULL");
         
         // Log da alteração
@@ -28,15 +28,15 @@ if ($result && $DB->numrows($result) > 0) {
 
 // Adicionar coluna message_id se não existir
 if (!$DB->fieldExists('glpi_plugin_ticketanswers_views', 'message_id')) {
-    $DB->query("ALTER TABLE `glpi_plugin_ticketanswers_views` 
-                ADD COLUMN `message_id` VARCHAR(255) DEFAULT NULL `followup_id`");
+    $DB->doQuery("ALTER TABLE `glpi_plugin_ticketanswers_views` 
+                ADD COLUMN `message_id` VARCHAR(255) DEFAULT NULL AFTER `followup_id`");
     
     // Log da alteração
     error_log("Adicionada coluna message_id à tabela glpi_plugin_ticketanswers_views");
 }
 
 // Garantir que os tipos de dados estejam corretos
-$DB->query("ALTER TABLE `glpi_plugin_ticketanswers_views` 
+$DB->doQuery("ALTER TABLE `glpi_plugin_ticketanswers_views` 
             MODIFY `ticket_id` VARCHAR(255) NOT NULL,
             MODIFY `followup_id` VARCHAR(255) NOT NULL");
 

@@ -61,11 +61,11 @@ try {
             AND t.status IN (1, 2)
     )";
     
-    $result = $DB->query($notifications_query);
+    $result = $DB->doQuery($notifications_query);
     $count = 0;
     
     // 2. Para cada notificação, marcar como lida usando a mesma lógica dos botões individuais
-    while ($data = $DB->fetchAssoc($result)) {
+    while ($data = $result->fetch_assoc()) {
         $ticket_id = $data['ticket_id'];
         $followup_id = $data['followup_id'];
         $notification_type = $data['notification_type'];
@@ -85,10 +85,10 @@ try {
                         WHERE users_id = $users_id
                         AND ticket_id = $ticket_id
                         AND followup_id = $actual_followup_id";
-        $check_result = $DB->query($check_query);
+        $check_result = $DB->doQuery($check_query);
         
         // Se não existir, inserir
-        if ($DB->numrows($check_result) == 0) {
+        if ($check_result->num_rows == 0) {
             $insert_result = $DB->insert('glpi_plugin_ticketanswers_views', [
                 'ticket_id' => $ticket_id,
                 'users_id' => $users_id,

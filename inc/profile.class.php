@@ -1,8 +1,24 @@
 <?php
+/**
+ * ---------------------------------------------------------------------
+ * Ticket Answers - GLPI Plugin
+ * Copyright (C) 2023-2025 by Jeferson Penna Alves
+ * ---------------------------------------------------------------------
+ * LICENSE
+ * This file is part of Ticket Answers.
+ * Ticket Answers is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * ---------------------------------------------------------------------
+ */
 
 class PluginTicketanswersProfile extends Profile {
+   
+   static $rightname = 'plugin_ticketanswers';
+
    static function getTypeName($nb = 0) {
-      return __('Ticket Answers', 'ticketanswers');
+      return 'Ticket Answers';
    }
 
    function getTabNameForItem(CommonGLPI $item, $withtemplate = 0) {
@@ -22,26 +38,28 @@ class PluginTicketanswersProfile extends Profile {
 
    function showForm($profiles_id = 0, $openform = true, $closeform = true) {
       echo "<div class='firstbloc'>";
+      
+      $profile = new Profile();
+      $profile->getFromDB($profiles_id);
+      
       if (($canedit = Session::haveRightsOr(self::$rightname, [CREATE, UPDATE, PURGE]))
           && $openform) {
-         $profile = new Profile();
          echo "<form method='post' action='".$profile->getFormURL()."'>";
       }
 
-      $profile = new Profile();
-      $profile->getFromDB($profiles_id);
-
       $rights = [
-         ['rights'    => [READ => __('Read')],
-          'label'     => __('Ticket Answers', 'ticketanswers'),
-          'field'     => 'plugin_ticketanswers'
+         [
+            'itemtype'  => 'PluginTicketanswersTicketanswers',
+            'label'     => 'Ticket Answers',
+            'field'     => 'plugin_ticketanswers',
+            'rights'    => [READ => 'Read']
          ]
       ];
       
-      $matrix_options = ['canedit'       => $canedit,
-                          'default_class' => 'tab_bg_2'];
-      
-      $profile->displayRightsChoiceMatrix($rights, $matrix_options);
+      $profile->displayRightsChoiceMatrix($rights, [
+         'canedit'       => $canedit,
+         'default_class' => 'tab_bg_2'
+      ]);
 
       if ($canedit && $closeform) {
          echo "<div class='center'>";
@@ -53,32 +71,35 @@ class PluginTicketanswersProfile extends Profile {
       echo "</div>";
    }
 
-   static function install($migration) {
+   static function install() {
       global $DB;
       
-      // Adicionar permissão padrão para perfis existentes
-      $profiles = $DB->request([
-         'SELECT' => ['id'],
-         'FROM'   => 'glpi_profiles'
-      ]);
+      $default_rights = READ;
       
-      foreach ($profiles as $profile) {
-         $DB->updateOrInsert('glpi_profilerights', [
-            'profiles_id'  => $profile['id'],
-            'name'         => 'plugin_ticketanswers',
-            'rights'       => READ
-         ], [
-            'profiles_id'  => $profile['id'],
-            'name'         => 'plugin_ticketanswers'
-         ]);
+      // Adicionar permissão padrão para perfis existentes
+      foreach ($DB->request('glpi_profiles') as $profile) {
+         $profileRight = new ProfileRight();
+         if (!$profileRight->getFromDBByCrit([
+            'profiles_id' => $profile['id'],
+            'name'        => 'plugin_ticketanswers'
+         ])) {
+            $profileRight->add([
+               'profiles_id' => $profile['id'],
+               'name'        => 'plugin_ticketanswers',
+               'rights'      => $default_rights
+            ]);
+         }
       }
+      
+      return true;
    }
 
    static function uninstall() {
       global $DB;
       
-      $DB->delete('glpi_profilerights', [
-         'name' => 'plugin_ticketanswers'
-      ]);
+      $profileRight = new ProfileRight();
+      $profileRight->deleteByCriteria(['name' => 'plugin_ticketanswers'], 1);
+      
+      return true;
    }
 }

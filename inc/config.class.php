@@ -1,4 +1,17 @@
 <?php
+/**
+ * ---------------------------------------------------------------------
+ * Ticket Answers - GLPI Plugin
+ * Copyright (C) 2023-2025 by Jeferson Penna Alves
+ * ---------------------------------------------------------------------
+ * LICENSE
+ * This file is part of Ticket Answers.
+ * Ticket Answers is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * ---------------------------------------------------------------------
+ */
 
 class PluginTicketanswersConfig extends CommonDBTM {
     
@@ -8,22 +21,19 @@ class PluginTicketanswersConfig extends CommonDBTM {
     * @see CommonGLPI::getMenuName()
    **/
    static function getMenuName() {
-      return __('Ticket Answers', 'ticketanswers');
+      return 'Ticket Answers';
    }
    
    /**
     *  @see CommonGLPI::getMenuContent()
    **/
    static function getMenuContent() {
-      global $CFG_GLPI;
-   
-      $menu = array();
+      $menu = [];
 
-      $menu['title'] = __('Ticket Answers', 'ticketanswers');
-      $menu['page']  = '/plugins/ticketanswers/front/index.php';
-      $menu['icon']  = 'fas fa-bell'; // Ícone de sino
+      $menu['title'] = 'Ticket Answers';
+      $menu['page']  = Plugin::getWebDir('ticketanswers', false) . '/front/index.php';
+      $menu['icon']  = 'ti ti-bell'; // Ícone compatível com GLPI 11
       
       return $menu;
    }
 }
-?>

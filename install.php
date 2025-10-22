@@ -39,7 +39,7 @@ function plugin_ticketanswers_install() {
             KEY `ticket_id` (`ticket_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
         
-        $DB->query($query) or die("Error creating glpi_plugin_ticketanswers_views table: " . $DB->error());
+        $DB->doQuery($query) or die("Error creating glpi_plugin_ticketanswers_views table: " . $DB->error());
     } else {
         // Atualizar esquema se a tabela já existir
         include_once(__DIR__ . '/install/update_schema.php');
@@ -57,7 +57,7 @@ function plugin_ticketanswers_uninstall() {
     // Remover tabela de visualizações
     if ($DB->tableExists('glpi_plugin_ticketanswers_views')) {
         $query = "DROP TABLE `glpi_plugin_ticketanswers_views`";
-        $DB->query($query) or die("Error dropping glpi_plugin_ticketanswers_views table");
+        $DB->doQuery($query) or die("Error dropping glpi_plugin_ticketanswers_views table");
     }
     
     return true;
