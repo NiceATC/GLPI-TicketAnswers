@@ -3,131 +3,135 @@ include ("../../../inc/includes.php");
 
 Session::checkLoginUser();
 
-// Obtém o ID do usuário logado
-$users_id = Session::getLoginUserID();
-$success = false;
-$total_count = 0;
+header("Content-Type: application/json");
 
 global $DB;
 
-// Gerar um message_id único para esta operação em lote
-$batch_message_id = 'batch_' . time();
-
-// Registrar início da operação
-error_log("Iniciando operação de marcar todas as notificações como lidas para o usuário $users_id (message_id: $batch_message_id)");
+$users_id = Session::getLoginUserID();
+$current_datetime = date("Y-m-d H:i:s");
 
 try {
-    // 1. Primeiro, vamos identificar todas as notificações não lidas
-    $notifications_query = "
-    (
-        -- Notificações de acompanhamento (followup)
-        SELECT 
-            t.id AS ticket_id,
-            tf.id AS followup_id,
-            'followup' AS notification_type
-        FROM 
-            glpi_tickets t
-            INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 2 AND tu.users_id = $users_id
-            INNER JOIN glpi_itilfollowups tf ON t.id = tf.items_id AND tf.itemtype = 'Ticket'
-            LEFT JOIN glpi_plugin_ticketanswers_views v ON (
-                v.users_id = $users_id AND
-                v.followup_id = tf.id
-            )
-        WHERE 
-            tf.users_id <> $users_id
-            AND v.id IS NULL
-            AND t.status != 6
-    )
-    UNION
-    (
-        -- Notificações de grupo
-        SELECT 
-            t.id AS ticket_id,
-            t.id AS followup_id,
-            'group' AS notification_type
-        FROM 
-            glpi_tickets t
-            INNER JOIN glpi_groups_tickets gt ON t.id = gt.tickets_id AND gt.type = 2
-            INNER JOIN glpi_groups_users gu ON gt.groups_id = gu.groups_id AND gu.users_id = $users_id
-            LEFT JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.users_id = $users_id AND tu.type = 2
-            LEFT JOIN glpi_plugin_ticketanswers_views v ON (
-                v.users_id = $users_id AND
-                v.ticket_id = t.id AND
-                v.followup_id = -t.id
-            )
-        WHERE 
-            tu.id IS NULL
-            AND v.id IS NULL
-            AND t.status IN (1, 2)
-    )";
+    // Marcar followups regulares como lidos
+    $query1 = "INSERT INTO glpi_plugin_ticketanswers_views (ticket_id, users_id, followup_id, viewed_at)
+               SELECT t.id, $users_id, tf.id, '$current_datetime'
+               FROM glpi_tickets t
+               INNER JOIN glpi_itilfollowups tf ON t.id = tf.items_id
+               LEFT JOIN glpi_plugin_ticketanswers_views v ON v.users_id = $users_id AND v.followup_id = tf.id
+               WHERE v.id IS NULL AND tf.itemtype = 'Ticket'
+               ON DUPLICATE KEY UPDATE viewed_at = '$current_datetime'";
     
-    $result = $DB->doQuery($notifications_query);
-    $count = 0;
+    $DB->doQuery($query1);
     
-    // 2. Para cada notificação, marcar como lida usando a mesma lógica dos botões individuais
-    while ($data = $result->fetch_assoc()) {
-        $ticket_id = $data['ticket_id'];
-        $followup_id = $data['followup_id'];
-        $notification_type = $data['notification_type'];
-        
-        // Determinar o valor correto de followup_id com base no tipo
-        $actual_followup_id = $followup_id;
-        if ($notification_type === 'group') {
-            $actual_followup_id = -$ticket_id;
-        } else if ($notification_type === 'observer') {
-            $actual_followup_id = -($ticket_id + 1000000);
-        } else if ($notification_type === 'assigned') {
-            $actual_followup_id = -($ticket_id + 2000000);
-        }
-        
-        // Verificar se já existe um registro para esta notificação
-        $check_query = "SELECT id FROM glpi_plugin_ticketanswers_views
-                        WHERE users_id = $users_id
-                        AND ticket_id = $ticket_id
-                        AND followup_id = $actual_followup_id";
-        $check_result = $DB->doQuery($check_query);
-        
-        // Se não existir, inserir
-        if ($check_result->num_rows == 0) {
-            $insert_result = $DB->insert('glpi_plugin_ticketanswers_views', [
-                'ticket_id' => $ticket_id,
-                'users_id' => $users_id,
-                'followup_id' => $actual_followup_id,
-                'viewed_at' => date('Y-m-d H:i:s'),
-                'message_id' => $batch_message_id
-            ]);
-            
-            if ($insert_result) {
-                $count++;
-                error_log("Marcada notificação como lida: ticket=$ticket_id, followup=$followup_id, tipo=$notification_type, actual_followup=$actual_followup_id");
-            } else {
-                error_log("Falha ao marcar notificação como lida: ticket=$ticket_id, followup=$followup_id, tipo=$notification_type");
-            }
-        } else {
-            error_log("Notificação já marcada como lida: ticket=$ticket_id, followup=$followup_id, tipo=$notification_type");
-        }
-    }
+    // Marcar soluções recusadas como lidas
+    $query2 = "INSERT INTO glpi_plugin_ticketanswers_views (ticket_id, users_id, followup_id, viewed_at)
+               SELECT t.id, $users_id, its.id, '$current_datetime'
+               FROM glpi_tickets t
+               INNER JOIN glpi_itilsolutions its ON t.id = its.items_id
+               LEFT JOIN glpi_plugin_ticketanswers_views v ON v.users_id = $users_id AND v.followup_id = its.id
+               WHERE v.id IS NULL AND its.itemtype = 'Ticket' AND its.status = 4
+               ON DUPLICATE KEY UPDATE viewed_at = '$current_datetime'";
     
-    $total_count = $count;
-    $success = ($count > 0);
+    $DB->doQuery($query2);
     
-    error_log("Marcadas $count notificações como lidas no total (message_id: $batch_message_id)");
+    // Marcar tickets de grupo como lidos (followup_id = ticket_id + 10000000)
+    $query3 = "INSERT INTO glpi_plugin_ticketanswers_views (ticket_id, users_id, followup_id, viewed_at)
+               SELECT t.id, $users_id, t.id + 10000000, '$current_datetime'
+               FROM glpi_tickets t
+               INNER JOIN glpi_groups_tickets gt ON t.id = gt.tickets_id AND gt.type = 2
+               INNER JOIN glpi_groups_users gu ON gt.groups_id = gu.groups_id AND gu.users_id = $users_id
+               LEFT JOIN glpi_plugin_ticketanswers_views v ON v.users_id = $users_id AND v.followup_id = t.id + 10000000
+               WHERE v.id IS NULL
+               ON DUPLICATE KEY UPDATE viewed_at = '$current_datetime'";
+    
+    $DB->doQuery($query3);
+    
+    // Marcar tickets de observador como lidos (followup_id = ticket_id + 20000000)
+    $query4 = "INSERT INTO glpi_plugin_ticketanswers_views (ticket_id, users_id, followup_id, viewed_at)
+               SELECT t.id, $users_id, t.id + 20000000, '$current_datetime'
+               FROM glpi_tickets t
+               INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 3 AND tu.users_id = $users_id
+               LEFT JOIN glpi_plugin_ticketanswers_views v ON v.users_id = $users_id AND v.followup_id = t.id + 20000000
+               WHERE v.id IS NULL
+               ON DUPLICATE KEY UPDATE viewed_at = '$current_datetime'";
+    
+    $DB->doQuery($query4);
+    
+    // Marcar tickets atribuídos ao técnico como lidos (followup_id = ticket_id + 30000000)
+    $query5 = "INSERT INTO glpi_plugin_ticketanswers_views (ticket_id, users_id, followup_id, viewed_at)
+               SELECT t.id, $users_id, t.id + 30000000, '$current_datetime'
+               FROM glpi_tickets t
+               INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 2 AND tu.users_id = $users_id
+               LEFT JOIN glpi_plugin_ticketanswers_views v ON v.users_id = $users_id AND v.followup_id = t.id + 30000000
+               WHERE v.id IS NULL
+               ON DUPLICATE KEY UPDATE viewed_at = '$current_datetime'";
+    
+    $DB->doQuery($query5);
+    
+    // Marcar mudanças de status como lidas (followup_id = CONCAT('status_', ticket_id, '_', status))
+    $query6 = "INSERT INTO glpi_plugin_ticketanswers_views (ticket_id, users_id, followup_id, viewed_at)
+               SELECT t.id, $users_id, CONCAT('status_', t.id, '_', t.status), '$current_datetime'
+               FROM glpi_tickets t
+               INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 1 AND tu.users_id = $users_id
+               LEFT JOIN glpi_plugin_ticketanswers_views v ON v.users_id = $users_id 
+                   AND v.followup_id = CONCAT('status_', t.id, '_', t.status)
+               WHERE v.id IS NULL AND t.status IN (2, 3, 4)
+               ON DUPLICATE KEY UPDATE viewed_at = '$current_datetime'";
+    
+    $DB->doQuery($query6);
+    
+    // Marcar motivos de pendência como lidos (followup_id = CONCAT('pending_', ticket_id))
+    $query7 = "INSERT INTO glpi_plugin_ticketanswers_views (ticket_id, users_id, followup_id, viewed_at)
+               SELECT t.id, $users_id, CONCAT('pending_', t.id), '$current_datetime'
+               FROM glpi_tickets t
+               INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 1 AND tu.users_id = $users_id
+               LEFT JOIN glpi_plugin_ticketanswers_views v ON v.users_id = $users_id 
+                   AND v.followup_id = CONCAT('pending_', t.id)
+               WHERE v.id IS NULL AND t.status = 3 AND t.waiting_duration > 0
+               ON DUPLICATE KEY UPDATE viewed_at = '$current_datetime'";
+    
+    $DB->doQuery($query7);
+    
+    // Marcar validações pendentes como lidas
+    $query8 = "INSERT INTO glpi_plugin_ticketanswers_views (ticket_id, users_id, followup_id, viewed_at)
+               SELECT t.id, $users_id, tv.id, '$current_datetime'
+               FROM glpi_tickets t
+               INNER JOIN glpi_ticketvalidations tv ON t.id = tv.tickets_id
+               LEFT JOIN glpi_plugin_ticketanswers_views v ON v.users_id = $users_id AND v.followup_id = tv.id
+               WHERE v.id IS NULL AND tv.users_id_validate = $users_id AND tv.status = 2
+               ON DUPLICATE KEY UPDATE viewed_at = '$current_datetime'";
+    
+    $DB->doQuery($query8);
+    
+    // Marcar respostas de validação como lidas (followup_id = CONCAT('validation_response_', validation_id))
+    $query9 = "INSERT INTO glpi_plugin_ticketanswers_views (ticket_id, users_id, followup_id, viewed_at)
+               SELECT t.id, $users_id, CONCAT('validation_response_', tv.id), '$current_datetime'
+               FROM glpi_tickets t
+               INNER JOIN glpi_ticketvalidations tv ON t.id = tv.tickets_id AND tv.users_id = $users_id
+               LEFT JOIN glpi_plugin_ticketanswers_views v ON v.users_id = $users_id 
+                   AND v.followup_id = CONCAT('validation_response_', tv.id)
+               WHERE v.id IS NULL AND tv.status IN (3, 4)
+               ON DUPLICATE KEY UPDATE viewed_at = '$current_datetime'";
+    
+    $DB->doQuery($query9);
+    
+    // Marcar tickets sem atribuição como lidos (followup_id = CONCAT('unassigned_', ticket_id))
+    $query10 = "INSERT INTO glpi_plugin_ticketanswers_views (ticket_id, users_id, followup_id, viewed_at)
+                SELECT t.id, $users_id, CONCAT('unassigned_', t.id), '$current_datetime'
+                FROM glpi_tickets t
+                INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 1 AND tu.users_id = $users_id
+                LEFT JOIN glpi_tickets_users tech ON t.id = tech.tickets_id AND tech.type = 2
+                LEFT JOIN glpi_groups_tickets gt ON t.id = gt.tickets_id AND gt.type = 2
+                LEFT JOIN glpi_plugin_ticketanswers_views v ON v.users_id = $users_id 
+                    AND v.followup_id = CONCAT('unassigned_', t.id)
+                WHERE tech.id IS NULL AND gt.id IS NULL AND v.id IS NULL AND t.status IN (1, 2)
+                ON DUPLICATE KEY UPDATE viewed_at = '$current_datetime'";
+    
+    $DB->doQuery($query10);
+    
+    echo json_encode(["success" => true, "message" => "Todas as notificações foram marcadas como lidas"]);
     
 } catch (Exception $e) {
-    error_log("Erro ao marcar notificações como lidas: " . $e->getMessage());
-    $success = false;
+    echo json_encode(["success" => false, "error" => $e->getMessage()]);
 }
 
-// Se for uma requisição AJAX, retornar JSON
-if (isset($_GET['ajax']) && $_GET['ajax'] == 1) {
-    echo json_encode([
-        'success' => $success, 
-        'count' => $total_count,
-        'message_id' => $batch_message_id
-    ]);
-    exit();
-}
-
-// Se não for AJAX, redirecionar para a página de notificações
-Html::redirect($CFG_GLPI["root_doc"] . "/plugins/ticketanswers/front/index.php");
-?>
+exit();

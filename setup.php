@@ -37,14 +37,16 @@ function plugin_init_ticketanswers() {
     Plugin::registerClass('PluginTicketanswersProfile', ['addtabon' => 'Profile']);
    
   if (Session::getLoginUserID()) {
-    // Adicionar menu ao GLPI
-    $PLUGIN_HOOKS['menu_toadd']['ticketanswers'] = ['plugins' => 'PluginTicketanswersMenu'];
+    // Adicionar submenu dentro do menu "Assistance" (Chamados)
+    $PLUGIN_HOOKS['menu_toadd']['ticketanswers'] = ['helpdesk' => 'PluginTicketanswersMenu'];
 
     // Assets globais (GLPI 11 serve a partir de public/plugins/ticketanswers)
     $PLUGIN_HOOKS['add_css']['ticketanswers'][] = 'css/vol_icone_notification.css';
+    $PLUGIN_HOOKS['add_css']['ticketanswers'][] = 'css/notification_dropdown.css';
 
     $PLUGIN_HOOKS['add_javascript']['ticketanswers'][] = 'js/unified_notifications.js';
     $PLUGIN_HOOKS['add_javascript']['ticketanswers'][] = 'js/notification_bell.js';
+    $PLUGIN_HOOKS['add_javascript']['ticketanswers'][] = 'js/notification_dropdown.js';
   }
 }
 

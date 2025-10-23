@@ -177,9 +177,18 @@ function injectNotificationButton(input_element, container = undefined) {
 
 // Método auxiliar para configurar eventos de clique
 function setupBellEvents(container) {
-    // Clique normal no sino abre a página de notificações
-    container.find('.notification-bell').on('click', function() {
-        window.location.href = CFG_GLPI.root_doc + '/plugins/ticketanswers/front/index.php';
+    // Clique normal no sino abre o DROPDOWN ao invés de redirecionar
+    container.find('.notification-bell').on('click', function(e) {
+        e.preventDefault();
+        console.log('🔔 Clicou no sino - abrindo dropdown...');
+        
+        // Verificar se o dropdown existe
+        if (window.NotificationDropdown && window.NotificationDropdown.toggle) {
+            window.NotificationDropdown.toggle();
+        } else {
+            console.error('❌ Dropdown não encontrado, redirecionando...');
+            window.location.href = CFG_GLPI.root_doc + '/plugins/ticketanswers/front/index.php';
+        }
     });
     
     // Clique com o botão direito no sino alterna o som
@@ -242,7 +251,7 @@ function getSoundEnabledState() {
 // Função para tocar um som de teste
 function playTestSound() {
     try {
-        const audio = new Audio(CFG_GLPI.root_doc + 'sound/notification.mp3');
+        const audio = new Audio(CFG_GLPI.root_doc + '/plugins/ticketanswers/public/sound/notification.mp3');
         audio.volume = 0.2; // Volume mais baixo para o teste
         audio.play().catch(error => {
             console.error('Erro ao reproduzir som de teste:', error);
@@ -254,11 +263,14 @@ function playTestSound() {
 
 // Função para tocar o som de notificação
 function playNotificationSound() {
-    console.log('Reproduzindo som de notificação...');
+    console.log('🔊 Tentando reproduzir som de notificação...');
     
     // Verificar se o som está habilitado
-    if (!getSoundEnabledState()) {
-        console.log('Som de notificação desabilitado nas configurações');
+    const soundEnabled = getSoundEnabledState();
+    console.log('🔊 Som habilitado?', soundEnabled);
+    
+    if (!soundEnabled) {
+        console.log('❌ Som de notificação desabilitado nas configurações');
         return;
     }
     
@@ -268,41 +280,38 @@ function playNotificationSound() {
         const lastPlayed = window.lastSoundPlayed || 0;
         
         if ((now - lastPlayed) < 5000) {
-            console.log('Som já tocado recentemente, ignorando');
+            console.log('⏸️ Som já tocado recentemente, ignorando');
             return;
         }
         
         window.lastSoundPlayed = now;
         
-        // Usar um elemento de áudio existente ou criar um novo
-        var audioElement = document.getElementById('notification-sound');
-        if (!audioElement) {
-            audioElement = document.createElement('audio');
-            audioElement.id = 'notification-sound';
-            audioElement.src = CFG_GLPI.root_doc + 'sound/notification.mp3';
-            document.body.appendChild(audioElement);
-        }
+        // Criar um novo elemento de áudio a cada vez
+        const soundPath = CFG_GLPI.root_doc + '/plugins/ticketanswers/public/sound/notification.mp3';
+        console.log('🔊 Caminho do som:', soundPath);
+        
+        var audioElement = new Audio(soundPath);
         
         // Definir volume
         var volume = (window.ticketAnswersConfig && window.ticketAnswersConfig.soundVolume)
             ? window.ticketAnswersConfig.soundVolume / 100
             : 0.5;
         audioElement.volume = volume;
-        
-        // Forçar o reinício do áudio
-        audioElement.currentTime = 0;
+        console.log('🔊 Volume configurado:', volume);
         
         // Tentar reproduzir
         var playPromise = audioElement.play();
         if (playPromise !== undefined) {
             playPromise.then(() => {
-                console.log('Som de notificação tocado com sucesso');
+                console.log('✅ Som de notificação tocado com sucesso!');
             }).catch(error => {
-                console.error('Erro ao tocar som de notificação:', error);
+                console.error('❌ Erro ao tocar som de notificação:', error);
+                console.error('Motivo:', error.message);
+                console.error('⚠️ Possível motivo: navegador bloqueou som sem interação do usuário');
             });
         }
     } catch (e) {
-        console.error('Exceção ao tentar tocar som:', e);
+        console.error('❌ Exceção ao tentar tocar som:', e);
     }
 }
 
@@ -394,17 +403,25 @@ function shouldShowBell() {
 
 // Função para atualizar o contador de notificações
 function updateNotificationCount(count) {
-    console.log('Atualizando indicador de notificações (sem contador numérico)');
+    // Garantir que count seja um número válido
+    count = parseInt(count) || 0;
+    
+    console.log('Atualizando indicador de notificações (sem contador numérico), contagem:', count);
+    
     if (count > 0) {
         // Há notificações não lidas - apenas colorir o sino
         $('.notification-bell i').addClass('has-notifications');
         
         // Remover o contador numérico
         $('.notification-count').remove();
+        
+        console.log('Sino colorido de vermelho - há', count, 'notificações');
     } else {
         // Não há notificações não lidas
         $('.notification-bell i').removeClass('has-notifications');
         $('.notification-count').remove();
+        
+        console.log('Sino normal - nenhuma notificação');
     }
 }
 
@@ -413,7 +430,8 @@ function checkNotifications() {
     console.log('Verificando notificações...');
     
     // Armazenar o valor atual antes da verificação
-    const previousCount = window.lastNotificationCount || 0;
+    const previousCount = window.lastNotificationCount;
+    const isFirstCheck = (typeof previousCount === 'undefined');
     
     $.ajax({
         url: CFG_GLPI.root_doc + '/plugins/ticketanswers/ajax/check_all_notifications.php',
@@ -427,33 +445,36 @@ function checkNotifications() {
             updateNotificationCount(currentCount);
             
             // TOCAR SOM APENAS SE HOUVER NOVAS NOTIFICAÇÕES
-// Ou seja, se o número atual for MAIOR que o anterior
-if (currentCount > previousCount) {
-    console.log('Novas notificações detectadas! Anterior:', previousCount, 'Atual:', currentCount);
-    
-    // Verificar se o usuário está na página de notificações
-    const isOnNotificationsPage = window.location.href.indexOf('/plugins/ticketanswers/front/index.php') > -1;
-    
-    // Sempre aplicar a animação de balançar, independentemente de onde o usuário está
-    $('.notification-bell').addClass('bell-super-animation');
+            // Ou seja, se o número atual for MAIOR que o anterior
+            // E NÃO for a primeira verificação (para evitar tocar som ao carregar a página)
+            if (currentCount > previousCount && !isFirstCheck) {
+                console.log('Novas notificações detectadas! Anterior:', previousCount, 'Atual:', currentCount);
+                
+                // Verificar se o usuário está na página de notificações
+                const isOnNotificationsPage = window.location.href.indexOf('/plugins/ticketanswers/front/index.php') > -1;
+                
+                // Sempre aplicar a animação de balançar, independentemente de onde o usuário está
+                $('.notification-bell').addClass('bell-super-animation');
 
-setTimeout(() => {
-    $('.notification-bell').removeClass('bell-super-animation');
-}, 3000);
-    
-    // Tocar som apenas se o usuário não estiver na página de notificações
-    if (!isOnNotificationsPage) {
-        // Tocar som se estiver habilitado
-        playNotificationSound();
-        
-        // Tentar mostrar notificação web
-        if (Notification.permission === "granted") {
-            showWebNotification("Você tem " + currentCount + " novas notificações");
-        }
-    } else {
-        console.log('Usuário já está na página de notificações, não tocando som');
-    }
-}
+                setTimeout(() => {
+                    $('.notification-bell').removeClass('bell-super-animation');
+                }, 3000);
+                
+                // Tocar som apenas se o usuário não estiver na página de notificações
+                if (!isOnNotificationsPage) {
+                    // Tocar som se estiver habilitado
+                    playNotificationSound();
+                    
+                    // Tentar mostrar notificação web
+                    if (Notification.permission === "granted") {
+                        showWebNotification("Você tem " + currentCount + " novas notificações");
+                    }
+                } else {
+                    console.log('Usuário já está na página de notificações, não tocando som');
+                }
+            } else if (isFirstCheck) {
+                console.log('Primeira verificação, apenas atualizando contador sem tocar som. Contagem:', currentCount);
+            }
      
             // Armazena o número atual de notificações para a próxima verificação
             window.lastNotificationCount = currentCount;

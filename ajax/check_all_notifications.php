@@ -220,7 +220,8 @@ FROM
         v.followup_id = tf.id
     )
 WHERE
-    v.id IS NULL
+    tf.users_id <> $users_id
+    AND v.id IS NULL
     AND t.status != 6
     AND tf.is_private = 0
     AND EXISTS (
@@ -262,16 +263,37 @@ WHERE
     AND t.waiting_duration > 0
     AND t.date_mod > DATE_SUB(NOW(), INTERVAL 7 DAY)";
 
+// Consulta para encontrar tickets sem atribuição (criados pelo usuário, sem técnico e sem grupo)
+$unassigned_query = "SELECT COUNT(DISTINCT t.id) as unassigned_count
+FROM
+    glpi_tickets t
+    INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 1 AND tu.users_id = $users_id
+    LEFT JOIN glpi_tickets_users tech ON t.id = tech.tickets_id AND tech.type = 2
+    LEFT JOIN glpi_groups_tickets gt ON t.id = gt.tickets_id AND gt.type = 2
+    LEFT JOIN glpi_plugin_ticketanswers_views v ON (
+        v.users_id = $users_id AND
+        v.ticket_id = t.id AND
+        v.followup_id = CONCAT('unassigned_', t.id)
+    )
+WHERE
+    tech.id IS NULL
+    AND gt.id IS NULL
+    AND v.id IS NULL
+    AND t.status IN (1, 2)
+    AND t.date_creation > DATE_SUB(NOW(), INTERVAL 7 DAY)";
+
 
 // Executar as novas consultas
 $technician_response_result = $DB->doQuery($technician_response_query);
 $status_change_result = $DB->doQuery($status_change_query);
 $pending_reason_result = $DB->doQuery($pending_reason_query);
+$unassigned_result = $DB->doQuery($unassigned_query);
 
 // Inicializar os novos contadores
 $technician_response_count = 0;
 $status_change_count = 0;
 $pending_reason_count = 0;
+$unassigned_count = 0;
 
 // Obter os resultados das novas contagens
 if ($technician_response_result && $technician_response_result->num_rows > 0) {
@@ -287,6 +309,11 @@ if ($status_change_result && $status_change_result->num_rows > 0) {
 if ($pending_reason_result && $pending_reason_result->num_rows > 0) {
     $pending_reason_data = $pending_reason_result->fetch_assoc();
     $pending_reason_count = $pending_reason_data['pending_reason_count'];
+}
+
+if ($unassigned_result && $unassigned_result->num_rows > 0) {
+    $unassigned_data = $unassigned_result->fetch_assoc();
+    $unassigned_count = $unassigned_data['unassigned_count'];
 }
 
 
@@ -347,6 +374,7 @@ $validation_response_count = 0;
 $validation_request_response_count = 0;
 $status_change_count = 0;
 $pending_reason_count = 0;
+$unassigned_count = 0;
 
 // Obter os resultados das contagens
 if ($followup_result && $followup_result->num_rows > 0) {
@@ -379,87 +407,8 @@ if ($assigned_tech_result && $assigned_tech_result->num_rows > 0) {
     $assigned_tech_count = $assigned_tech_data['assigned_tech_count'];
 }
 
-// SOLUÇÃO DE FORÇA BRUTA PARA O CONTADOR DE VALIDAÇÃO
-// Esta solução força o contador de validação com base no diagnóstico que sabemos que funciona
-$force_validation_sql = "SELECT COUNT(DISTINCT tv.id) as direct_count
-                        FROM glpi_ticketvalidations tv 
-                        JOIN glpi_tickets t ON tv.tickets_id = t.id
-                        LEFT JOIN glpi_plugin_ticketanswers_views v ON (
-                            v.users_id = $users_id AND 
-                            v.followup_id = tv.id
-                        )
-                        WHERE 
-                            tv.users_id_validate = $users_id
-                            AND tv.status = 2
-                            AND t.status != 6
-                            AND v.id IS NULL";
-
-$force_result = $DB->doQuery($force_validation_sql);
-if ($force_result && $force_result->num_rows > 0) {
-    $force_data = $force_result->fetch_assoc();
-    $direct_count = intval($force_data['direct_count']);
-    
-    // Sobrescrever diretamente o contador de validação com o valor correto
-    $validation_count = $direct_count;
-    
-    error_log("FORÇA BRUTA: Substituindo validation_count para $direct_count");
-}
-
-// SOLUÇÃO DE FORÇA BRUTA PARA O CONTADOR DE OBSERVADOR
-// Consulta direta para contar tickets onde o usuário é observador
-$force_observer_sql = "SELECT COUNT(DISTINCT t.id) as direct_count
-                      FROM glpi_tickets t
-                      INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id 
-                            AND tu.type = 3 
-                            AND tu.users_id = $users_id
-                      LEFT JOIN glpi_plugin_ticketanswers_views v ON (
-                          v.users_id = $users_id AND
-                          v.followup_id = t.id + 20000000
-                      )
-                      WHERE
-                          v.id IS NULL
-                          AND t.status IN (1, 2, 3, 4)";  // Incluindo status 3 e 4 também
-
-$force_observer_result = $DB->doQuery($force_observer_sql);
-if ($force_observer_result && $force_observer_result->num_rows > 0) {
-    $force_observer_data = $force_observer_result->fetch_assoc();
-    $direct_observer_count = intval($force_observer_data['direct_count']);
-    
-    // Sobrescrever diretamente o contador de observador com o valor correto
-    $observer_count = $direct_observer_count;
-    
-    error_log("FORÇA BRUTA: Substituindo observer_count para $direct_observer_count");
-}
-
-// SOLUÇÃO DE FORÇA BRUTA PARA O CONTADOR DE MUDANÇAS DE STATUS
-$force_status_change_sql = "SELECT COUNT(DISTINCT t.id) as direct_count
-                           FROM glpi_tickets t
-                           INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id 
-                                 AND tu.type = 1 
-                                 AND tu.users_id = $users_id
-                           LEFT JOIN glpi_plugin_ticketanswers_views v ON (
-                               v.users_id = $users_id AND
-                               v.ticket_id = t.id AND
-                               (
-                                   v.followup_id = CONCAT('status_', t.id, '_', t.status) OR
-                                   v.followup_id = CONCAT('status_', t.id, '_any')
-                               )
-                           )
-                           WHERE
-                               v.id IS NULL
-                               AND t.status IN (2, 4, 5)  -- Em atendimento, Pendente, Solucionado
-                               AND t.date_mod > DATE_SUB(NOW(), INTERVAL 7 DAY)";
-
-$force_status_result = $DB->doQuery($force_status_change_sql);
-if ($force_status_result && $force_status_result->num_rows > 0) {
-    $force_status_data = $force_status_result->fetch_assoc();
-    $direct_status_count = intval($force_status_data['direct_count']);
-    
-    // Sobrescrever diretamente o contador de mudanças de status
-    $status_change_count = $direct_status_count;
-    
-    error_log("FORÇA BRUTA: Substituindo status_change_count para $direct_status_count");
-}
+// Contadores já foram calculados pelas queries principais acima
+// Não há necessidade de queries adicionais de "força bruta"
 
 
 
@@ -755,6 +704,31 @@ $unified_count_query = "SELECT COUNT(*) as total FROM (
             AND (tv.status = 3 OR tv.status = 4) -- Aprovado (3) ou Recusado (4)
             AND v.id IS NULL
             AND tv.validation_date > DATE_SUB(NOW(), INTERVAL 30 DAY)
+        
+        UNION
+        
+        -- Notificações de tickets sem atribuição (sem técnico e sem grupo)
+        SELECT
+            t.id AS ticket_id,
+            CONCAT('unassigned_', t.id) AS followup_id,
+            t.date_creation AS notification_date,
+            'unassigned' AS type
+        FROM
+            glpi_tickets t
+            INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 1 AND tu.users_id = $users_id
+            LEFT JOIN glpi_tickets_users tech ON t.id = tech.tickets_id AND tech.type = 2
+            LEFT JOIN glpi_groups_tickets gt ON t.id = gt.tickets_id AND gt.type = 2
+            LEFT JOIN glpi_plugin_ticketanswers_views v ON (
+                v.users_id = $users_id AND
+                v.ticket_id = t.id AND
+                v.followup_id = CONCAT('unassigned_', t.id)
+            )
+        WHERE
+            tech.id IS NULL
+            AND gt.id IS NULL
+            AND v.id IS NULL
+            AND t.status IN (1, 2)
+            AND t.date_creation > DATE_SUB(NOW(), INTERVAL 7 DAY)
     ) AS all_notifications
     GROUP BY ticket_id, type
 ) AS unique_notifications";
@@ -771,20 +745,71 @@ if ($unified_count_result && $unified_count_result->num_rows > 0) {
 $total_count_sum = $followup_count + $refused_count + $group_count + $observer_count +
                   $group_observer_count + $assigned_tech_count + $validation_count +
                   $validation_response_count + $validation_request_response_count +
-                  $technician_response_count + $status_change_count + $pending_reason_count;
+                  $technician_response_count + $status_change_count + $pending_reason_count +
+                  $unassigned_count;
 
 // Usar o maior valor como total principal
 $final_count = max($total_count_unified, $total_count_sum);
 
-// Adicionar log para depuração
-error_log("DEBUG: Contagens após agrupamento - unificada=$total_count_unified, soma=$total_count_sum, final=$final_count");
-
-// DIAGNÓSTICO FINAL
-error_log("=== CONTADORES FINAIS ===");
-error_log("validation_count: $validation_count");
-error_log("total_count_sum: $total_count_sum");
-error_log("final_count: $final_count");
-error_log("unified_count: $total_count_unified");
+// DEBUG: Se houver discrepância, buscar a notificação fantasma
+$debug_phantom = [];
+if ($final_count > 0 && $total_count_sum == 0) {
+    // Buscar qual notificação está sendo contada pela query unificada
+    $phantom_query = "SELECT 
+        ticket_id,
+        type,
+        followup_id,
+        notification_date
+    FROM (
+        -- Cópia exata da query unificada, mas retornando detalhes
+        SELECT
+            t.id AS ticket_id,
+            tf.id AS followup_id,
+            tf.date AS notification_date,
+            'followup' AS type
+        FROM
+            glpi_tickets t
+            INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 2 AND tu.users_id = $users_id
+            INNER JOIN glpi_itilfollowups tf ON t.id = tf.items_id AND tf.itemtype = 'Ticket'
+            LEFT JOIN glpi_users u ON tf.users_id = u.id
+            LEFT JOIN glpi_plugin_ticketanswers_views v ON (
+                v.users_id = $users_id AND
+                v.followup_id = tf.id
+            )
+        WHERE
+            tf.users_id <> $users_id
+            AND v.id IS NULL
+            AND t.status != 6
+            AND tf.is_private = 0
+            AND tf.date > (
+                SELECT
+                    COALESCE(MAX(date), '1970-01-01')
+                FROM
+                    glpi_itilfollowups tf2
+                WHERE
+                    tf2.items_id = t.id
+                    AND tf2.itemtype = 'Ticket'
+                    AND tf2.users_id = $users_id
+            )
+            AND NOT EXISTS (
+                SELECT 1
+                FROM glpi_itilsolutions its
+                WHERE its.items_id = t.id
+                AND its.itemtype = 'Ticket'
+                AND its.status = 4
+                AND its.users_id_approval = tf.users_id
+                AND ABS(UNIX_TIMESTAMP(its.date_approval) - UNIX_TIMESTAMP(tf.date)) <= 3
+            )
+    ) AS all_notif
+    LIMIT 5";
+    
+    $phantom_result = $DB->doQuery($phantom_query);
+    if ($phantom_result && $phantom_result->num_rows > 0) {
+        while ($row = $phantom_result->fetch_assoc()) {
+            $debug_phantom[] = $row;
+        }
+    }
+}
 
 // Preparar a resposta com o valor correto de contagem
 $response = [
@@ -801,8 +826,10 @@ $response = [
     'technician_response_count' => $technician_response_count,
     'status_change_count' => $status_change_count,
     'pending_reason_count' => $pending_reason_count,
+    'unassigned_count' => $unassigned_count,
     'combined_count' => $final_count,  // Usar o mesmo valor final aqui
-    'timestamp' => time()
+    'timestamp' => time(),
+    'debug_phantom' => $debug_phantom  // Mostrar notificação fantasma se existir
 ];
 
 

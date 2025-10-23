@@ -5,15 +5,27 @@ Session::checkLoginUser();
 
 global $DB;
 
-// Verificar se os parâmetros necessários foram fornecidos
-$ticket_id = isset($_GET['ticket_id']) ? intval($_GET['ticket_id']) : 0;
-$followup_id = isset($_GET['followup_id']) ? intval($_GET['followup_id']) : 0;
-$notification_type = isset($_GET['type']) ? $DB->escape($_GET['type']) : 'followup';
-$message_id = isset($_GET['message_id']) ? intval($_GET['message_id']) : null;
+// Forçar header JSON desde o início
+header('Content-Type: application/json');
+
+// Verificar se os parâmetros necessários foram fornecidos (aceitar GET ou POST)
+$ticket_id = isset($_REQUEST['ticket_id']) ? intval($_REQUEST['ticket_id']) : 0;
+$followup_id = isset($_REQUEST['followup_id']) ? intval($_REQUEST['followup_id']) : 0;
+$notification_type = isset($_REQUEST['type']) ? $DB->escape($_REQUEST['type']) : 'followup';
+$message_id = isset($_REQUEST['message_id']) ? intval($_REQUEST['message_id']) : null;
 $users_id = Session::getLoginUserID();
 $success = false;
 
-error_log("Marcando notificação como lida: tipo=$notification_type, ticket=$ticket_id, followup=$followup_id, user=$users_id, message_id=$message_id");
+error_log("🔔 MARK AS READ - Recebido: tipo=$notification_type, ticket=$ticket_id, followup=$followup_id, user=$users_id");
+
+// Se não tiver ticket_id mas tiver followup_id, tentar extrair do followup
+if ($ticket_id == 0 && $followup_id > 0) {
+    // Se followup_id é grande, extrair o ticket_id dele
+    if ($followup_id > 10000000) {
+        $ticket_id = $followup_id % 10000000;
+        error_log("🔔 Ticket ID extraído do followup_id: $ticket_id");
+    }
+}
 
 if ($ticket_id > 0) {
     global $DB;
@@ -26,7 +38,7 @@ if ($ticket_id > 0) {
         $actual_followup_id = $ticket_id + 10000000;
     } else if ($notification_type === 'observer' || $notification_type === 'group_observer') {
         $actual_followup_id = $ticket_id + 20000000;
-    } else if ($notification_type === 'assigned') {
+    } else if ($notification_type === 'assigned' || $notification_type === 'assigned_tech') {
         $actual_followup_id = $ticket_id + 30000000;
     } else if ($notification_type === 'validation') {
         // Para notificações de validação, usar o ID real da validação
@@ -38,8 +50,8 @@ if ($ticket_id > 0) {
     } else if ($notification_type === 'pending_reason') {
         // Para motivos de pendência, criar um ID específico
         $actual_followup_id = $ticket_id + 50000000;
-    } else if ($notification_type === 'technician_response') {
-        // Para respostas de técnicos, usar o ID do followup diretamente
+    } else if ($notification_type === 'technician_response' || $notification_type === 'followup' || $notification_type === 'refused') {
+        // Para respostas de técnicos, followups e recusas, usar o ID do followup diretamente
         $actual_followup_id = intval($followup_id);
     } else {
         // Para outros tipos, garantir que o followup_id seja tratado como número
@@ -158,16 +170,15 @@ function markNotificationAsRead($DB, $ticket_id, $users_id, $followup_id, $curre
     }
 }
 
-// Se for uma requisição AJAX, retornar JSON
-if (isset($_GET['ajax']) && $_GET['ajax'] == 1) {
-    header('Content-Type: application/json');
-    echo json_encode(['success' => $success]);
-    exit();
-}
+// Log final do resultado
+error_log("DEBUG: Operação de marcação concluída. Success=$success");
 
-// Se não for AJAX, redirecionar para a página do ticket
-if ($ticket_id > 0) {
-    Html::redirect($CFG_GLPI["root_doc"] . "/front/ticket.form.php?id=" . $ticket_id);
-} else {
-    Html::redirect($CFG_GLPI["root_doc"] . "/plugins/ticketanswers/front/index.php");
-}
+// Sempre retornar JSON para requisições AJAX
+header('Content-Type: application/json');
+echo json_encode([
+    'success' => $success,
+    'ticket_id' => $ticket_id,
+    'followup_id' => $followup_id,
+    'type' => $notification_type
+]);
+exit();

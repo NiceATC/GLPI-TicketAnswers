@@ -101,6 +101,7 @@ function markNotificationAsRead(ticketId, followupId, type, newTab) {
                 type === 'validation_response' ||
                 type === 'validation_request_response' ||
                 type === 'pending_reason' ||
+                type === 'assigned_tech' ||
                 type === 'technician_response') {
                 rowId = 'notification-row-' + ticketId + '-' + followupId;
             } else {
@@ -810,6 +811,34 @@ UNION
         AND t.status = 3
         AND t.waiting_duration > 0
         AND t.date_mod > DATE_SUB(NOW(), INTERVAL 7 DAY)
+)
+UNION
+(
+    -- Notificações de chamados recém atribuídos ao técnico
+    SELECT
+        t.id AS ticket_id,
+        t.name AS ticket_name,
+        t.content AS ticket_content,
+        0 AS followup_id,
+        t.date_mod AS notification_date,
+        CONCAT('Chamado atribuído a você em ', DATE_FORMAT(t.date_mod, '%d/%m/%Y %H:%i')) AS followup_content,
+        u.name AS user_name,
+        NULL AS group_name,
+        NULL AS refuse_reason,
+        'assigned_tech' AS notification_type
+    FROM
+        glpi_tickets t
+        INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 2 AND tu.users_id = $users_id
+        LEFT JOIN glpi_users u ON t.users_id_recipient = u.id
+        LEFT JOIN glpi_plugin_ticketanswers_views v ON (
+            v.users_id = $users_id AND
+            v.ticket_id = t.id AND
+            v.followup_id = t.id + 30000000
+        )
+    WHERE
+        v.id IS NULL
+        AND t.status IN (1, 2)
+        AND t.date_mod > DATE_SUB(NOW(), INTERVAL 7 DAY)
 )";
 
 
@@ -892,10 +921,9 @@ echo "<div id='notifications-container'>";
 
 if ($result && $numNotifications > 0) {
     // Adiciona o botão "Marcar todos como lido" no topo da tabela
-    /*echo "<div class='center' style='margin-bottom: 15px;'>";
+    echo "<div class='center' style='margin-bottom: 15px;'>";
     echo "<a href='javascript:void(0)' onclick='markAllAsRead()' class='btn btn-warning'>
-            <i class='fas fa-check-double'></i> Marcar todos como lido
-          </a>";*/
+            <i class='fas fa-check-double'></i> Marcar todos como lido</a>";
     
     // Adicionar seletor de quantidade por página
     echo "<div style='margin: 10px auto; text-align: center; display: flex; justify-content: center; align-items: center;'>";
@@ -981,6 +1009,9 @@ switch ($notification_type) {
     case 'assigned':
         echo "<span class='badge bg-warning text-white'>Atribuído</span>";
         break;
+    case 'assigned_tech':
+        echo "<span class='badge bg-info text-white'>Atribuído a você</span>";
+        break;
     
     // Tipos de Observador
     case 'observer':
@@ -1050,6 +1081,8 @@ if ($notification_type == 'followup') {
     echo $data['user_name'] . " <small>(" . "para grupo" . ": " . $data['group_name'] . ")</small>";
 } elseif ($notification_type == 'refused') {
     echo $data['user_name'] . " <small>(" . "recusou o chamado" . ")</small>";
+} elseif ($notification_type == 'assigned_tech') {
+    echo $data['user_name'] . " <small>(" . "solicitante" . ")</small>";
 } elseif ($notification_type == 'validation' || $notification_type == 'validation_request') {
     echo $data['user_name'] . " <small>(" . "solicitou validação" . ")</small>";
 } elseif ($notification_type == 'validation_approved' || 
@@ -1175,6 +1208,17 @@ echo "</td>";
                   </a>";
                     // Link para ver em nova aba
                     echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", 0, \"assigned\", true); return false;' class='btn btn-secondary' title='" . "Ver em nova aba" . "'>
+                    <i class='fas fa-external-link-alt'></i>
+                  </a>";
+                    break;
+                    
+                case 'assigned_tech':
+                    // Link para ver na mesma aba
+                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . ($data['ticket_id'] + 30000000) . ", \"assigned_tech\", false)' class='btn btn-info' title='" . "Ver chamado" . "'>
+                    <i class='fas fa-eye'></i>
+                  </a>";
+                    // Link para ver em nova aba
+                    echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . ($data['ticket_id'] + 30000000) . ", \"assigned_tech\", true); return false;' class='btn btn-secondary' title='" . "Ver em nova aba" . "'>
                     <i class='fas fa-external-link-alt'></i>
                   </a>";
                     break;

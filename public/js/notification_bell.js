@@ -39,10 +39,13 @@ function addNotificationBell() {
         if (formcreatorHeader.length > 0) {
             console.log('Cabeçalho do FormCreator encontrado');
             
-            // Criar um contêiner para o sino
-            const bellContainer = $('<div class="notification-container" style="margin-left: auto; margin-right: 15px; display: flex; align-items: center;"></div>');
-            bellContainer.append(getNotificationButton());
-            bellContainer.append(getSoundToggleButton());
+            // Criar um contêiner para o sino e som
+            const bellContainer = $('<div class="notification-container" style="margin-left: auto; margin-right: 15px; display: flex; align-items: center; gap: 5px;"></div>');
+            const bellButton = getNotificationButton();
+            const soundButton = getSoundToggleButton();
+            
+            bellContainer.append(bellButton);
+            bellContainer.append(soundButton);
             
             // Adicionar ao cabeçalho do FormCreator
             formcreatorHeader.append(bellContainer);
@@ -61,9 +64,12 @@ function addNotificationBell() {
             console.log('Menu de usuário encontrado');
             
             // Criar um novo item de menu para o sino
-            const bellItem = $('<li class="nav-item" style="display: flex; align-items: center; margin-right: 10px;"></li>');
-            bellItem.append(getNotificationButton());
-            bellItem.append(getSoundToggleButton());
+            const bellItem = $('<li class="nav-item" style="display: flex; align-items: center; gap: 5px; margin-right: 10px;"></li>');
+            const bellButton = getNotificationButton();
+            const soundButton = getSoundToggleButton();
+            
+            bellItem.append(bellButton);
+            bellItem.append(soundButton);
             
             // Adicionar antes do menu de usuário
             userMenu.prepend(bellItem);
@@ -82,9 +88,12 @@ function addNotificationBell() {
             console.log('Cabeçalho principal encontrado');
             
             // Criar um contêiner para o sino
-            const bellContainer = $('<div class="notification-container" style="margin-left: auto; margin-right: 15px; display: flex; align-items: center;"></div>');
-            bellContainer.append(getNotificationButton());
-            bellContainer.append(getSoundToggleButton());
+            const bellContainer = $('<div class="notification-container" style="margin-left: auto; margin-right: 15px; display: flex; align-items: center; gap: 5px;"></div>');
+            const bellButton = getNotificationButton();
+            const soundButton = getSoundToggleButton();
+            
+            bellContainer.append(bellButton);
+            bellContainer.append(soundButton);
             
             // Adicionar ao cabeçalho
             header.first().append(bellContainer);
@@ -103,9 +112,12 @@ function addNotificationBell() {
             console.log('Cabeçalho da interface simplificada encontrado');
             
             // Criar um contêiner para o sino
-            const bellContainer = $('<div class="notification-container" style="margin-left: auto; margin-right: 15px; display: flex; align-items: center;"></div>');
-            bellContainer.append(getNotificationButton());
-            bellContainer.append(getSoundToggleButton());
+            const bellContainer = $('<div class="notification-container" style="margin-left: auto; margin-right: 15px; display: flex; align-items: center; gap: 5px;"></div>');
+            const bellButton = getNotificationButton();
+            const soundButton = getSoundToggleButton();
+            
+            bellContainer.append(bellButton);
+            bellContainer.append(soundButton);
             
             // Adicionar ao cabeçalho da interface simplificada
             selfServiceHeader.append(bellContainer);
@@ -129,6 +141,7 @@ function addNotificationBell() {
                 right: 10px;
                 z-index: 9999;
                 display: flex;
+                gap: 5px;
                 background-color: #f8f9fa;
                 padding: 5px;
                 border-radius: 5px;
@@ -136,8 +149,11 @@ function addNotificationBell() {
             "></div>
         `);
         
-        floatingBell.append(getNotificationButton());
-        floatingBell.append(getSoundToggleButton());
+        const bellButton = getNotificationButton();
+        const soundButton = getSoundToggleButton();
+        
+        floatingBell.append(bellButton);
+        floatingBell.append(soundButton);
         
         // Adicionar ao corpo da página
         $('body').append(floatingBell);
@@ -156,9 +172,12 @@ function addNotificationBell() {
 // Função para obter o botão de notificação
 function getNotificationButton() {
     return $(`
-        <button type="button" class="notification-bell btn btn-outline-secondary" title="Notificações">
-            <i class="fas fa-bell fa-lg"></i>
-        </button>`);
+        <div class="notification-bell-container" style="position: relative; display: inline-block;">
+            <button type="button" class="notification-bell btn btn-outline-secondary" title="Notificações">
+                <i class="fas fa-bell fa-lg"></i>
+            </button>
+            <span class="notification-badge hidden">0</span>
+        </div>`);
 }
 
 // Função para obter o botão de toggle de som
@@ -167,8 +186,8 @@ function getSoundToggleButton() {
     const icon = soundEnabled ? 'fa-volume-up' : 'fa-volume-mute';
     const title = soundEnabled ? 'Desativar som de notificações' : 'Ativar som de notificações';
     return $(`
-        <button type="button" class="sound-toggle btn btn-sm btn-outline-secondary" title="${title}" style="margin-left: 5px;">
-            <i class="fas ${icon}"></i>
+        <button type="button" class="sound-toggle btn btn-outline-secondary" title="${title}">
+            <i class="fas ${icon} fa-lg"></i>
         </button>`);
 }
 
@@ -192,8 +211,18 @@ function injectNotificationButton(input_element, container = undefined) {
 
 // Método auxiliar para configurar eventos de clique
 function setupBellEvents(container) {
-    container.find('.notification-bell').on('click', function() {
-        window.location.href = CFG_GLPI.root_doc + '/plugins/ticketanswers/front/index.php';
+    // Clique no sino abre o DROPDOWN
+    container.find('.notification-bell').on('click', function(e) {
+        e.preventDefault();
+        console.log('🔔 Clicou no sino - abrindo dropdown...');
+        
+        // Verificar se o dropdown existe
+        if (window.NotificationDropdown && window.NotificationDropdown.toggle) {
+            window.NotificationDropdown.toggle();
+        } else {
+            console.error('❌ Dropdown não encontrado, redirecionando...');
+            window.location.href = CFG_GLPI.root_doc + '/plugins/ticketanswers/front/index.php';
+        }
     });
     
     container.find('.sound-toggle').on('click', function(e) {
@@ -255,7 +284,7 @@ function getSoundEnabledState() {
 // Função para tocar um som de teste
 function playTestSound() {
     try {
-        const audio = new Audio(CFG_GLPI.root_doc + 'sound/notification.mp3');
+        const audio = new Audio(CFG_GLPI.root_doc + '/plugins/ticketanswers/public/sound/notification.mp3');
         audio.volume = 0.2; // Volume mais baixo para o teste
         audio.play().catch(error => {
             console.error('Erro ao reproduzir som de teste:', error);
@@ -267,11 +296,14 @@ function playTestSound() {
 
 // Função para tocar o som de notificação
 function playNotificationSound() {
-    console.log('Reproduzindo som de notificação...');
+    console.log('🔊 Tentando reproduzir som de notificação...');
     
     // Verificar se o som está habilitado
-    if (!getSoundEnabledState()) {
-        console.log('Som de notificação desabilitado nas configurações');
+    const soundEnabled = getSoundEnabledState();
+    console.log('🔊 Som habilitado?', soundEnabled);
+    
+    if (!soundEnabled) {
+        console.log('❌ Som de notificação desabilitado nas configurações');
         return;
     }
     
@@ -281,41 +313,38 @@ function playNotificationSound() {
         const lastPlayed = window.lastSoundPlayed || 0;
         
         if ((now - lastPlayed) < 5000) {
-            console.log('Som já tocado recentemente, ignorando');
+            console.log('⏸️ Som já tocado recentemente, ignorando');
             return;
         }
         
         window.lastSoundPlayed = now;
         
-        // Usar um elemento de áudio existente ou criar um novo
-        var audioElement = document.getElementById('notification-sound');
-        if (!audioElement) {
-            audioElement = document.createElement('audio');
-            audioElement.id = 'notification-sound';
-            audioElement.src = CFG_GLPI.root_doc + 'sound/notification.mp3';
-            document.body.appendChild(audioElement);
-        }
+        // Criar um novo elemento de áudio a cada vez
+        const soundPath = CFG_GLPI.root_doc + '/plugins/ticketanswers/public/sound/notification.mp3';
+        console.log('🔊 Caminho do som:', soundPath);
+        
+        var audioElement = new Audio(soundPath);
         
         // Definir volume
         var volume = (window.ticketAnswersConfig && window.ticketAnswersConfig.soundVolume)
             ? window.ticketAnswersConfig.soundVolume / 100
             : 0.5;
         audioElement.volume = volume;
-        
-        // Forçar o reinício do áudio
-        audioElement.currentTime = 0;
+        console.log('🔊 Volume configurado:', volume);
         
         // Tentar reproduzir
         var playPromise = audioElement.play();
         if (playPromise !== undefined) {
             playPromise.then(() => {
-                console.log('Som de notificação tocado com sucesso');
+                console.log('✅ Som de notificação tocado com sucesso!');
             }).catch(error => {
-                console.error('Erro ao tocar som de notificação:', error);
+                console.error('❌ Erro ao tocar som de notificação:', error);
+                console.error('Motivo:', error.message);
+                console.error('⚠️ Possível motivo: navegador bloqueou som sem interação do usuário');
             });
         }
     } catch (e) {
-        console.error('Exceção ao tentar tocar som:', e);
+        console.error('❌ Exceção ao tentar tocar som:', e);
     }
 }
 
@@ -430,7 +459,8 @@ function checkNotifications() {
     console.log('Verificando notificações...');
     
     // Armazenar o valor atual antes da verificação
-    const previousCount = window.lastNotificationCount || 0;
+    const previousCount = window.lastNotificationCount;
+    const isFirstCheck = (typeof previousCount === 'undefined');
     
     $.ajax({
         url: CFG_GLPI.root_doc + '/plugins/ticketanswers/ajax/check_all_notifications.php',
@@ -444,8 +474,9 @@ function checkNotifications() {
             updateNotificationCount(currentCount);
             
             // Verificar se há novas notificações (contagem atual > contagem anterior)
-            if (currentCount > previousCount) {
-                console.log('Novas notificações detectadas! Anterior:', previousCount, 'Atual:', currentCount);
+            // E NÃO for a primeira verificação (para evitar tocar som ao carregar a página)
+            if (currentCount > previousCount && !isFirstCheck) {
+                console.log('🔔 NOVA NOTIFICAÇÃO DETECTADA! Anterior:', previousCount, 'Atual:', currentCount);
                 
                 // Aplicar a animação de pulso ao sino
                 $('.notification-bell').addClass('animate-bell');
@@ -454,7 +485,10 @@ function checkNotifications() {
                 }, 3000);
                 
                 // Tocar som de notificação
+                console.log('🔊 Chamando playNotificationSound()...');
                 playNotificationSound();
+            } else if (isFirstCheck) {
+                console.log('✓ Primeira verificação, apenas atualizando contador sem tocar som. Contagem:', currentCount);
             }
             
             // Armazena o número atual de notificações para a próxima verificação
@@ -468,17 +502,34 @@ function checkNotifications() {
 
 // Função para atualizar o contador de notificações
 function updateNotificationCount(count) {
-    console.log('Atualizando indicador de notificações no sino');
+    // Garantir que count seja um número válido
+    count = parseInt(count) || 0;
+    
+    console.log('Atualizando indicador de notificações no sino, contagem:', count);
+    
+    const bell = $('.notification-bell');
+    const badge = $('.notification-badge');
+    const bellIcon = bell.find('i');
+    
     if (count > 0) {
-        // Apenas indicar que há notificações (sem número)
-        $('.notification-bell i').addClass('has-notifications');
+        // Mostrar badge com contador
+        badge.text(count > 99 ? '99+' : count);
+        badge.removeClass('hidden');
         
-        // Remover o contador numérico
-        $('.notification-count').remove();
+        // Sino vermelho quando há notificações
+        bell.removeClass('btn-outline-secondary').addClass('btn-danger');
+        bellIcon.addClass('text-white has-notifications');
+        
+        console.log('Sino colorido de vermelho - há', count, 'notificações');
     } else {
-        // Remover indicação visual
-        $('.notification-bell i').removeClass('has-notifications');
-        $('.notification-count').remove();
+        // Esconder badge
+        badge.addClass('hidden');
+        
+        // Sino normal quando não há notificações
+        bell.removeClass('btn-danger').addClass('btn-outline-secondary');
+        bellIcon.removeClass('text-white has-notifications');
+        
+        console.log('Sino normal - nenhuma notificação');
     }
 }
 
