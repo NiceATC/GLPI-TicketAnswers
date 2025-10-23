@@ -255,7 +255,7 @@ function getSoundEnabledState() {
 // Função para tocar um som de teste
 function playTestSound() {
     try {
-        const audio = new Audio(CFG_GLPI.root_doc + '/plugins/ticketanswers/sound/notification.mp3');
+        const audio = new Audio(CFG_GLPI.root_doc + 'sound/notification.mp3');
         audio.volume = 0.2; // Volume mais baixo para o teste
         audio.play().catch(error => {
             console.error('Erro ao reproduzir som de teste:', error);
@@ -292,7 +292,7 @@ function playNotificationSound() {
         if (!audioElement) {
             audioElement = document.createElement('audio');
             audioElement.id = 'notification-sound';
-            audioElement.src = CFG_GLPI.root_doc + '/plugins/ticketanswers/sound/notification.mp3';
+            audioElement.src = CFG_GLPI.root_doc + 'sound/notification.mp3';
             document.body.appendChild(audioElement);
         }
         

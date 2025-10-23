@@ -1255,34 +1255,6 @@ echo "</td>";
     echo "</div>"; // Fim do container de ticket-notifications
     echo "</div>"; // Fim do container central
     
-    // Carregar arquivos JavaScript diretamente (fallback caso o hook global não funcione)
-    echo '<script>console.log("🔧 TicketAnswers: Carregando scripts na página do plugin...");</script>';
-    
-    $js_files = [
-        PLUGIN_TICKETANSWERS_DIR . '/js/unified_notifications.js',
-        PLUGIN_TICKETANSWERS_DIR . '/js/notification_bell.js'
-    ];
-
-    echo "<script>";
-    foreach ($js_files as $js_file) {
-        if (file_exists($js_file)) {
-            echo "\n// ===== " . basename($js_file) . " =====\n";
-            echo file_get_contents($js_file);
-            echo "\nconsole.log('✅ TicketAnswers (página): " . basename($js_file) . " carregado');\n";
-        } else {
-            echo "\nconsole.error('❌ Arquivo não encontrado: " . $js_file . "');\n";
-        }
-    }
-    echo "</script>";
-
-    // Carregar CSS diretamente
-    $css_file = PLUGIN_TICKETANSWERS_DIR . '/public/css/vol_icone_notification.css';
-    if (file_exists($css_file)) {
-        echo "<style>";
-        echo file_get_contents($css_file);
-        echo "</style>";
-        echo "<script>console.log('✅ TicketAnswers (página): CSS carregado');</script>";
-    }
 
     echo "<script>
     $(document).ready(function() {

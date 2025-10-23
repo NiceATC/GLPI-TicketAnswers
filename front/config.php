@@ -148,7 +148,7 @@ $(document).ready(function() {
         $('#sound-test-result').html('<div class=\"alert alert-info\">Tentando reproduzir som...</div>');
         
         try {
-            var audio = new Audio('" . $CFG_GLPI["root_doc"] . "/plugins/ticketanswers/sound/notification.mp3');
+            var audio = new Audio('" . $CFG_GLPI["root_doc"] . "sound/notification.mp3');
             
             audio.addEventListener('play', function() {
                 $('#sound-test-result').html('<div class=\"alert alert-success\">Som reproduzido com sucesso!</div>');
