@@ -508,37 +508,6 @@ WHERE
 )
 UNION
 (
-    -- Notificações de chamados recém atribuídos ao técnico
-SELECT
-    t.id AS ticket_id,
-    t.name AS ticket_name,
-    t.content AS ticket_content,
-    0 AS followup_id,
-    t.date_mod AS notification_date,
-    t.content AS followup_content,
-    u.name AS user_name,
-    NULL AS group_name,
-    NULL AS refuse_reason,
-    'assigned' AS notification_type
-FROM
-    glpi_tickets t
-    INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 2 AND tu.users_id = $users_id
-    LEFT JOIN glpi_users u ON t.users_id_recipient = u.id
-    LEFT JOIN glpi_plugin_ticketanswers_views v ON (
-        v.users_id = $users_id AND
-        v.ticket_id = t.id AND
-        v.followup_id = t.id + 30000000
-    )
-WHERE
-    v.id IS NULL
-    AND t.status IN (1, 2)
-    -- Modificado para usar diferença entre datas menor que 1 dia
-    AND TIMESTAMPDIFF(DAY, t.date_creation, t.date_mod) < 1
-    AND t.date_mod > DATE_SUB(NOW(), INTERVAL 7 DAY)
-
-)
-UNION
-(
     -- Consulta otimizada para todas as validações (como validador ou solicitante)
     SELECT DISTINCT
         t.id AS ticket_id,
@@ -1006,9 +975,6 @@ switch ($notification_type) {
     case 'group':
         echo "<span class='badge bg-success text-white'>Novo chamado</span>";
         break;
-    case 'assigned':
-        echo "<span class='badge bg-warning text-white'>Atribuído</span>";
-        break;
     case 'assigned_tech':
         echo "<span class='badge bg-info text-white'>Atribuído a você</span>";
         break;
@@ -1197,17 +1163,6 @@ echo "</td>";
                   </a>";
                     // Link para ver em nova aba
                     echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", " . $data['followup_id'] . ", \"followup\", true); return false;' class='btn btn-secondary' title='" . "Ver em nova aba" . "'>
-                    <i class='fas fa-external-link-alt'></i>
-                  </a>";
-                    break;
-                    
-                case 'assigned':
-                    // Link para ver na mesma aba
-                    echo "<a href='javascript:void(0)' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", 0, \"assigned\", false)' class='btn btn-info' title='" . "Ver chamado" . "'>
-                    <i class='fas fa-eye'></i>
-                  </a>";
-                    // Link para ver em nova aba
-                    echo "<a href='#' onclick='markNotificationAsRead(" . $data['ticket_id'] . ", 0, \"assigned\", true); return false;' class='btn btn-secondary' title='" . "Ver em nova aba" . "'>
                     <i class='fas fa-external-link-alt'></i>
                   </a>";
                     break;

@@ -440,15 +440,48 @@ function checkNotifications() {
         success: (data) => {
             // Log condensado - sobrescreve o anterior
             console.clear();
-            console.log('🔔 Status:', {
-                total: data.combined_count || 0,
+            console.log('🔔 Contadores recebidos:', {
+                combined_count: data.combined_count || 0,
+                count: data.count || 0,
                 followup: data.followup_count || 0,
+                technician_response: data.technician_response_count || 0,
                 refused: data.refused_count || 0,
                 group: data.group_count || 0,
-                assigned: data.assigned_count || 0,
+                observer: data.observer_count || 0,
+                group_observer: data.group_observer_count || 0,
+                assigned_tech: data.assigned_tech_count || 0,
                 validation: data.validation_count || 0,
+                validation_response: data.validation_response_count || 0,
+                validation_request_response: data.validation_request_response_count || 0,
+                status_change: data.status_change_count || 0,
+                pending_reason: data.pending_reason_count || 0,
                 unassigned: data.unassigned_count || 0
             });
+            
+            // Somar para verificar discrepância
+            const soma_individual = (data.followup_count || 0) + 
+                                    (data.technician_response_count || 0) + 
+                                    (data.refused_count || 0) + 
+                                    (data.group_count || 0) + 
+                                    (data.observer_count || 0) + 
+                                    (data.group_observer_count || 0) + 
+                                    (data.assigned_tech_count || 0) + 
+                                    (data.validation_count || 0) + 
+                                    (data.validation_response_count || 0) + 
+                                    (data.validation_request_response_count || 0) + 
+                                    (data.status_change_count || 0) + 
+                                    (data.pending_reason_count || 0) + 
+                                    (data.unassigned_count || 0);
+            
+            console.log('📊 Análise:', {
+                combined_count: data.combined_count || 0,
+                soma_individual: soma_individual,
+                diferenca: (data.combined_count || 0) - soma_individual
+            });
+            
+            if (data.debug_phantom && data.debug_phantom.length > 0) {
+                console.log('👻 Notificações fantasma:', data.debug_phantom);
+            }
             
             // Atualizar o contador visual
             const currentCount = data.combined_count || data.count || 0;
@@ -484,7 +517,7 @@ function updateNotificationCount(count) {
     
     
     const bell = $('.notification-bell');
-    const badge = $('.notification-badge');
+    const badge = $('.notification-bell-container .notification-badge');
     const bellIcon = bell.find('i');
     
     if (count > 0) {

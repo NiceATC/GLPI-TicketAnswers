@@ -41,9 +41,6 @@ if ($result && $result->num_rows > 0) {
 // Verifica se há um timestamp 'since' na requisição
 $since = isset($_GET['since']) ? intval($_GET['since']) : 0;
 
-// Adicionar log para depuração
-error_log("DEBUG: Iniciando verificação de notificações para usuário $users_id");
-
 // Consulta para encontrar tickets atribuídos ao técnico com respostas não vistas
 // Modificada para corresponder à consulta usada na página de notificações
 $followup_query = "SELECT COUNT(DISTINCT tf.id) as followup_count
@@ -288,6 +285,36 @@ WHERE
     )";
 
 
+// DEBUG: Query de diagnóstico para status_change
+$status_debug = "SELECT 
+    t.id,
+    t.name,
+    t.status,
+    t.date_mod,
+    CONCAT('status_', t.id, '_', t.status) as followup_id_expected,
+    v.id as view_id,
+    v.followup_id as view_followup_id
+FROM
+    glpi_tickets t
+    INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 1 AND tu.users_id = $users_id
+    LEFT JOIN glpi_plugin_ticketanswers_views v ON (
+        v.users_id = $users_id AND
+        v.ticket_id = t.id AND
+        v.followup_id = CONCAT('status_', t.id, '_', t.status)
+    )
+WHERE
+    t.status IN (2, 3, 4)
+    AND t.date_mod > DATE_SUB(NOW(), INTERVAL 7 DAY)
+LIMIT 5";
+
+$debug_result = $DB->doQuery($status_debug);
+$status_debug_info = [];
+if ($debug_result && $debug_result->num_rows > 0) {
+    while ($row = $debug_result->fetch_assoc()) {
+        $status_debug_info[] = $row;
+    }
+}
+
 // Executar as novas consultas
 $technician_response_result = $DB->doQuery($technician_response_query);
 $status_change_result = $DB->doQuery($status_change_query);
@@ -366,20 +393,6 @@ $group_result = $DB->doQuery($group_query);
 $observer_result = $DB->doQuery($observer_query);
 $group_observer_result = $DB->doQuery($group_observer_query);
 $assigned_tech_result = $DB->doQuery($assigned_tech_query);
-
-// Inicializar contadores
-$followup_count = 0;
-$refused_count = 0;
-$group_count = 0;
-$observer_count = 0;
-$group_observer_count = 0;
-$assigned_tech_count = 0;
-$validation_count = 0;
-$validation_response_count = 0;
-$validation_request_response_count = 0;
-$status_change_count = 0;
-$pending_reason_count = 0;
-$unassigned_count = 0;
 
 // Obter os resultados das contagens
 if ($followup_result && $followup_result->num_rows > 0) {
@@ -539,7 +552,8 @@ $unified_count_query = "SELECT COUNT(*) as total FROM (
             )
         WHERE
             v.id IS NULL
-            AND t.status IN (1, 2, 3, 4)  -- Novo, Em atendimento, Pendente, Solucionado
+            AND t.status IN (1, 2)  -- Mesmo filtro do contador individual
+            AND t.date_creation > DATE_SUB(NOW(), INTERVAL 7 DAY)
         
         UNION
         
@@ -712,6 +726,31 @@ $unified_count_query = "SELECT COUNT(*) as total FROM (
         
         UNION
         
+        -- Notificações de respostas a solicitações de validação (solicitante vê a resposta)
+        SELECT
+            t.id AS ticket_id,
+            CONCAT('validation_request_response_', tv.id) AS followup_id,
+            tv.validation_date AS notification_date,
+            'validation_request_response' AS type
+        FROM
+            glpi_tickets t
+            INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.users_id = $users_id AND tu.type = 1
+            INNER JOIN glpi_ticketvalidations tv ON t.id = tv.tickets_id
+            LEFT JOIN glpi_plugin_ticketanswers_views v ON (
+                v.users_id = $users_id AND
+                v.ticket_id = t.id AND
+                v.followup_id = CONCAT('validation_request_response_', tv.id)
+            )
+        WHERE
+            t.status != 6  -- Excluir chamados fechados
+            AND (tv.status = 3 OR tv.status = 4)  -- Aprovado ou recusado
+            AND v.id IS NULL
+            AND tv.users_id <> $users_id
+            AND tv.users_id_validate <> $users_id
+            AND tv.validation_date > DATE_SUB(NOW(), INTERVAL 30 DAY)
+        
+        UNION
+        
         -- Notificações de tickets sem atribuição (sem técnico e sem grupo)
         SELECT
             t.id AS ticket_id,
@@ -839,7 +878,8 @@ $response = [
     'unassigned_count' => $unassigned_count,
     'combined_count' => $final_count,  // Usar o mesmo valor final aqui
     'timestamp' => time(),
-    'debug_phantom' => $debug_phantom  // Mostrar notificação fantasma se existir
+    'debug_phantom' => $debug_phantom,  // Mostrar notificação fantasma se existir
+    'debug_status_change' => $status_debug_info  // DEBUG: Info sobre status_change
 ];
 
 
@@ -1186,7 +1226,7 @@ if ($followup_result && $followup_result->num_rows > 0) {
             'assigned_date' => Html::convDateTime($data['assigned_date']),
             'requester_name' => $data['requester_name'],
             'ticket_content' => $short_text,
-            'type' => 'assigned'
+            'type' => 'assigned_tech'
         ];
     }
     
@@ -1261,24 +1301,14 @@ $diagnostic_sql = "SELECT tv.id, t.name, tv.status, tv.submission_date, tv.users
                    LIMIT 5";
 
 $result = $DB->doQuery($diagnostic_sql);
-error_log("=== DIAGNÓSTICO DE VALIDAÇÕES ===");
 if ($result && $result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        error_log(json_encode($row));
-        
         // Verificar se há um registro de visualização para esta validação
         $view_sql = "SELECT id FROM glpi_plugin_ticketanswers_views 
                      WHERE users_id = $users_id AND followup_id = {$row['id']}";
         $view_result = $DB->doQuery($view_sql);
-        $viewed = ($view_result && $view_result->num_rows > 0) ? "SIM" : "NÃO";
-        error_log("Validação ID {$row['id']} já foi visualizada? $viewed");
     }
-} else {
-    error_log("Nenhuma validação pendente encontrada para o usuário $users_id");
 }
-
-// Verificar como o contador final está sendo calculado
-error_log("=== VERIFICAÇÃO DE CONTADORES ===");
 
 // Retornar a resposta como JSON
 header('Content-Type: application/json');

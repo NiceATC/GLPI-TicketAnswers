@@ -38,7 +38,7 @@ if ($ticket_id > 0) {
         $actual_followup_id = $ticket_id + 10000000;
     } else if ($notification_type === 'observer' || $notification_type === 'group_observer') {
         $actual_followup_id = $ticket_id + 20000000;
-    } else if ($notification_type === 'assigned' || $notification_type === 'assigned_tech') {
+    } else if ($notification_type === 'assigned_tech') {
         $actual_followup_id = $ticket_id + 30000000;
     } else if ($notification_type === 'validation') {
         // Para notificações de validação, usar o ID real da validação
