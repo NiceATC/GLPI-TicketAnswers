@@ -1276,7 +1276,7 @@ echo "</td>";
     echo "</script>";
 
     // Carregar CSS diretamente
-    $css_file = PLUGIN_TICKETANSWERS_DIR . '/css/vol_icone_notification.css';
+    $css_file = PLUGIN_TICKETANSWERS_DIR . '/public/css/vol_icone_notification.css';
     if (file_exists($css_file)) {
         echo "<style>";
         echo file_get_contents($css_file);

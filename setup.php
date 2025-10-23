@@ -36,10 +36,16 @@ function plugin_init_ticketanswers() {
     // Registrar as classes do plugin
     Plugin::registerClass('PluginTicketanswersProfile', ['addtabon' => 'Profile']);
    
-    if (Session::getLoginUserID()) {
-        // Adicionar menu ao GLPI
-        $PLUGIN_HOOKS['menu_toadd']['ticketanswers'] = ['plugins' => 'PluginTicketanswersMenu'];
-    }
+  if (Session::getLoginUserID()) {
+    // Adicionar menu ao GLPI
+    $PLUGIN_HOOKS['menu_toadd']['ticketanswers'] = ['plugins' => 'PluginTicketanswersMenu'];
+
+    // Assets globais (GLPI 11 serve a partir de public/plugins/ticketanswers)
+    $PLUGIN_HOOKS['add_css']['ticketanswers'][] = 'css/vol_icone_notification.css';
+
+    $PLUGIN_HOOKS['add_javascript']['ticketanswers'][] = 'js/unified_notifications.js';
+    $PLUGIN_HOOKS['add_javascript']['ticketanswers'][] = 'js/notification_bell.js';
+  }
 }
 
 /**
