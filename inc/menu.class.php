@@ -15,7 +15,7 @@
 
 class PluginTicketanswersMenu extends CommonGLPI {
    
-   static $rightname = 'plugin_ticketanswers';
+   static $rightname = 'ticket'; // Usar direito de ticket para permitir self-service
 
    static function getMenuName() {
       return __('Ticket Answers', 'ticketanswers');
@@ -27,14 +27,16 @@ class PluginTicketanswersMenu extends CommonGLPI {
       $menu['page']  = Plugin::getWebDir('ticketanswers', false) . '/front/index.php';
       $menu['icon']  = 'ti ti-bell'; // Ícone compatível com GLPI 11 (Tabler Icons)
       
-      // Adicionar submenus se necessário
-      // $menu['options'] = [
-      //    'stats' => [
-      //       'title' => __('Statistics', 'ticketanswers'),
-      //       'page'  => Plugin::getWebDir('ticketanswers', false) . '/front/stats.php',
-      //       'icon'  => 'ti ti-chart-bar',
-      //    ],
-      // ];
+      // Adicionar submenu de configuração
+      if (Session::haveRight('config', READ)) {
+         $menu['options'] = [
+            'config' => [
+               'title' => __('Configuration', 'ticketanswers'),
+               'page'  => Plugin::getWebDir('ticketanswers', false) . '/front/config.php',
+               'icon'  => 'ti ti-settings',
+            ],
+         ];
+      }
       
       return $menu;
    }

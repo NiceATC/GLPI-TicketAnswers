@@ -40,6 +40,11 @@ function plugin_init_ticketanswers() {
     // Adicionar submenu dentro do menu "Assistance" (Chamados)
     $PLUGIN_HOOKS['menu_toadd']['ticketanswers'] = ['helpdesk' => 'PluginTicketanswersMenu'];
 
+    // Link de configuração na página de plugins (ícone de chavinha)
+    if (Session::haveRight('config', UPDATE)) {
+        $PLUGIN_HOOKS['config_page']['ticketanswers'] = 'front/config.php';
+    }
+
     // Assets globais (GLPI 11 serve a partir de public/plugins/ticketanswers)
     $PLUGIN_HOOKS['add_css']['ticketanswers'][] = 'css/vol_icone_notification.css';
     $PLUGIN_HOOKS['add_css']['ticketanswers'][] = 'css/notification_dropdown.css';

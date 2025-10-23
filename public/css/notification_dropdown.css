@@ -7,6 +7,7 @@
 .notification-bell-container {
     position: relative;
     display: inline-block;
+    /* Importante para que o dropdown seja relativo a este container */
 }
 
 .notification-bell-container .notification-badge {
@@ -337,14 +338,20 @@
 /* Responsivo */
 @media (max-width: 600px) {
     .notification-dropdown {
+        /* Em telas pequenas, fixar na tela ao invés de relativo ao sino */
+        position: fixed;
         right: 10px;
         left: 10px;
+        top: 60px;
         width: auto;
+        max-width: 100%;
         max-height: 70vh;
     }
     
+    /* Centralizar a seta em telas pequenas */
     .notification-dropdown::before {
-        right: 20px;
+        right: 50%;
+        margin-right: -8px;
     }
 }
 

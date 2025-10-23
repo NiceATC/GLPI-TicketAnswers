@@ -5,11 +5,9 @@
 
 // Função para adicionar o sino de notificações à interface
 function addNotificationBell() {
-    console.log('Tentando adicionar o sino de notificações...');
     
     // Verificar se o sino já existe
     if ($('.notification-bell').length > 0) {
-        console.log('Sino já existe, não adicionando novamente');
         return;
     }
     
@@ -20,7 +18,6 @@ function addNotificationBell() {
     if (!success) {
         const global_search = $('input[name="globalsearch"], input.form-control-search, .search-input');
         if (global_search.length > 0) {
-            console.log('Campo de pesquisa global encontrado:', global_search.length);
             let container = global_search.closest('.input-group');
             if (container.length === 0) {
                 container = global_search.parent();
@@ -28,7 +25,6 @@ function addNotificationBell() {
             if (container.length > 0) {
                 injectNotificationButton(global_search, container);
                 success = true;
-                console.log('Sino adicionado ao campo de pesquisa global');
             }
         }
     }
@@ -37,7 +33,6 @@ function addNotificationBell() {
     if (!success) {
         const formcreatorHeader = $('.plugin_formcreator_userForm_header, .plugin_formcreator_header');
         if (formcreatorHeader.length > 0) {
-            console.log('Cabeçalho do FormCreator encontrado');
             
             // Criar um contêiner para o sino e som
             const bellContainer = $('<div class="notification-container" style="margin-left: auto; margin-right: 15px; display: flex; align-items: center; gap: 5px;"></div>');
@@ -53,7 +48,6 @@ function addNotificationBell() {
             // Configurar eventos de clique
             setupBellEvents(bellContainer);
             success = true;
-            console.log('Sino adicionado ao cabeçalho do FormCreator');
         }
     }
     
@@ -61,10 +55,9 @@ function addNotificationBell() {
     if (!success) {
         const userMenu = $('.navbar .navbar-nav:last-child, .navbar .ms-auto, header .navbar-nav:last-child, .user-menu');
         if (userMenu.length > 0) {
-            console.log('Menu de usuário encontrado');
             
             // Criar um novo item de menu para o sino
-            const bellItem = $('<li class="nav-item" style="display: flex; align-items: center; gap: 5px; margin-right: 10px;"></li>');
+            const bellItem = $('<li class="nav-item" style="display: flex; align-items: center; gap: 5px; margin-right: 10px; flex-direction: row;"></li>');
             const bellButton = getNotificationButton();
             const soundButton = getSoundToggleButton();
             
@@ -77,7 +70,6 @@ function addNotificationBell() {
             // Configurar eventos de clique
             setupBellEvents(bellItem);
             success = true;
-            console.log('Sino adicionado ao menu de usuário');
         }
     }
     
@@ -85,7 +77,6 @@ function addNotificationBell() {
     if (!success) {
         const header = $('header, .navbar, .main-header, #header_top, .top-bar');
         if (header.length > 0) {
-            console.log('Cabeçalho principal encontrado');
             
             // Criar um contêiner para o sino
             const bellContainer = $('<div class="notification-container" style="margin-left: auto; margin-right: 15px; display: flex; align-items: center; gap: 5px;"></div>');
@@ -101,7 +92,6 @@ function addNotificationBell() {
             // Configurar eventos de clique
             setupBellEvents(bellContainer);
             success = true;
-            console.log('Sino adicionado ao cabeçalho principal');
         }
     }
     
@@ -109,7 +99,6 @@ function addNotificationBell() {
     if (!success) {
         const selfServiceHeader = $('.navbar.self-service, .self-service .navbar, .self-service-header');
         if (selfServiceHeader.length > 0) {
-            console.log('Cabeçalho da interface simplificada encontrado');
             
             // Criar um contêiner para o sino
             const bellContainer = $('<div class="notification-container" style="margin-left: auto; margin-right: 15px; display: flex; align-items: center; gap: 5px;"></div>');
@@ -125,13 +114,11 @@ function addNotificationBell() {
             // Configurar eventos de clique
             setupBellEvents(bellContainer);
             success = true;
-            console.log('Sino adicionado ao cabeçalho da interface simplificada');
         }
     }
     
     // 6. Último recurso: adicionar como elemento flutuante
     if (!success) {
-        console.log('Nenhum local adequado encontrado, adicionando sino flutuante');
         
         // Criar um contêiner flutuante para o sino
         const floatingBell = $(`
@@ -161,7 +148,6 @@ function addNotificationBell() {
         // Configurar eventos de clique
         setupBellEvents(floatingBell);
         success = true;
-        console.log('Sino adicionado como elemento flutuante');
     }
     
     if (!success) {
@@ -214,7 +200,6 @@ function setupBellEvents(container) {
     // Clique no sino abre o DROPDOWN
     container.find('.notification-bell').on('click', function(e) {
         e.preventDefault();
-        console.log('🔔 Clicou no sino - abrindo dropdown...');
         
         // Verificar se o dropdown existe
         if (window.NotificationDropdown && window.NotificationDropdown.toggle) {
@@ -260,7 +245,6 @@ function toggleNotificationSound() {
         console.error('Não foi possível salvar a preferência de som:', e);
     }
     
-    console.log('Som de notificações ' + (soundEnabled ? 'ativado' : 'desativado'));
 }
 
 // Função para obter o estado atual do som
@@ -296,14 +280,11 @@ function playTestSound() {
 
 // Função para tocar o som de notificação
 function playNotificationSound() {
-    console.log('🔊 Tentando reproduzir som de notificação...');
     
     // Verificar se o som está habilitado
     const soundEnabled = getSoundEnabledState();
-    console.log('🔊 Som habilitado?', soundEnabled);
     
     if (!soundEnabled) {
-        console.log('❌ Som de notificação desabilitado nas configurações');
         return;
     }
     
@@ -313,7 +294,6 @@ function playNotificationSound() {
         const lastPlayed = window.lastSoundPlayed || 0;
         
         if ((now - lastPlayed) < 5000) {
-            console.log('⏸️ Som já tocado recentemente, ignorando');
             return;
         }
         
@@ -321,7 +301,6 @@ function playNotificationSound() {
         
         // Criar um novo elemento de áudio a cada vez
         const soundPath = CFG_GLPI.root_doc + '/plugins/ticketanswers/public/sound/notification.mp3';
-        console.log('🔊 Caminho do som:', soundPath);
         
         var audioElement = new Audio(soundPath);
         
@@ -330,17 +309,12 @@ function playNotificationSound() {
             ? window.ticketAnswersConfig.soundVolume / 100
             : 0.5;
         audioElement.volume = volume;
-        console.log('🔊 Volume configurado:', volume);
         
         // Tentar reproduzir
         var playPromise = audioElement.play();
         if (playPromise !== undefined) {
             playPromise.then(() => {
-                console.log('✅ Som de notificação tocado com sucesso!');
             }).catch(error => {
-                console.error('❌ Erro ao tocar som de notificação:', error);
-                console.error('Motivo:', error.message);
-                console.error('⚠️ Possível motivo: navegador bloqueou som sem interação do usuário');
             });
         }
     } catch (e) {
@@ -350,7 +324,6 @@ function playNotificationSound() {
 
 // Adicionar estilos CSS necessários
 function addNotificationStyles() {
-    console.log('Adicionando estilos CSS para notificações');
     
     const css = `
         /* Animação de balançar o sino */
@@ -442,7 +415,6 @@ function addNotificationStyles() {
 
 // Verificar se deve mostrar o sino
 function shouldShowBell() {
-    console.log('Verificando se deve mostrar o sino...');
     
     // Verificar se há uma configuração explícita
     if (window.ticketAnswersConfig && typeof window.ticketAnswersConfig.showBellEverywhere !== 'undefined') {
@@ -456,7 +428,6 @@ function shouldShowBell() {
 
 // Função para verificar notificações
 function checkNotifications() {
-    console.log('Verificando notificações...');
     
     // Armazenar o valor atual antes da verificação
     const previousCount = window.lastNotificationCount;
@@ -467,16 +438,25 @@ function checkNotifications() {
         type: 'GET',
         dataType: 'json',
         success: (data) => {
-            console.log('Notificações verificadas:', data);
+            // Log condensado - sobrescreve o anterior
+            console.clear();
+            console.log('🔔 Status:', {
+                total: data.combined_count || 0,
+                followup: data.followup_count || 0,
+                refused: data.refused_count || 0,
+                group: data.group_count || 0,
+                assigned: data.assigned_count || 0,
+                validation: data.validation_count || 0,
+                unassigned: data.unassigned_count || 0
+            });
             
             // Atualizar o contador visual
             const currentCount = data.combined_count || data.count || 0;
             updateNotificationCount(currentCount);
             
-            // Verificar se há novas notificações (contagem atual > contagem anterior)
-            // E NÃO for a primeira verificação (para evitar tocar som ao carregar a página)
+            // Verificar se há novas notificações
             if (currentCount > previousCount && !isFirstCheck) {
-                console.log('🔔 NOVA NOTIFICAÇÃO DETECTADA! Anterior:', previousCount, 'Atual:', currentCount);
+                console.log('🆕 Nova notificação detectada!');
                 
                 // Aplicar a animação de pulso ao sino
                 $('.notification-bell').addClass('animate-bell');
@@ -485,17 +465,14 @@ function checkNotifications() {
                 }, 3000);
                 
                 // Tocar som de notificação
-                console.log('🔊 Chamando playNotificationSound()...');
                 playNotificationSound();
-            } else if (isFirstCheck) {
-                console.log('✓ Primeira verificação, apenas atualizando contador sem tocar som. Contagem:', currentCount);
             }
             
             // Armazena o número atual de notificações para a próxima verificação
             window.lastNotificationCount = currentCount;
         },
         error: (xhr, status, error) => {
-            console.error('Erro ao verificar notificações:', error);
+            console.error('❌ Erro ao verificar notificações:', error);
         }
     });
 }
@@ -505,7 +482,6 @@ function updateNotificationCount(count) {
     // Garantir que count seja um número válido
     count = parseInt(count) || 0;
     
-    console.log('Atualizando indicador de notificações no sino, contagem:', count);
     
     const bell = $('.notification-bell');
     const badge = $('.notification-badge');
@@ -520,7 +496,6 @@ function updateNotificationCount(count) {
         bell.removeClass('btn-outline-secondary').addClass('btn-danger');
         bellIcon.addClass('text-white has-notifications');
         
-        console.log('Sino colorido de vermelho - há', count, 'notificações');
     } else {
         // Esconder badge
         badge.addClass('hidden');
@@ -529,7 +504,6 @@ function updateNotificationCount(count) {
         bell.removeClass('btn-danger').addClass('btn-outline-secondary');
         bellIcon.removeClass('text-white has-notifications');
         
-        console.log('Sino normal - nenhuma notificação');
     }
 }
 
@@ -546,8 +520,6 @@ $(document).ready(function() {
     console.log('========== DOCUMENT READY TRIGGERED ==========');
     console.log('CFG_GLPI disponível:', typeof CFG_GLPI !== 'undefined');
     
-    // Verificar se o jQuery está funcionando corretamente
-    console.log('jQuery versão:', $.fn.jquery);
     
     // Verificar se elementos importantes existem
     console.log('Campo de pesquisa global:', $('input[name="globalsearch"], input.form-control-search, .search-input').length);
@@ -571,7 +543,6 @@ $(document).ready(function() {
                     ? window.ticketAnswersConfig.checkInterval * 1000 
                     : 3000; // Padrão: 3 segundos
                 
-                console.log('Configurando verificação periódica a cada', checkInterval/1000, 'segundos');
                 window.notificationInterval = setInterval(checkNotifications, checkInterval);
                 
             } catch (e) {
@@ -585,14 +556,11 @@ $(document).ready(function() {
             try {
                 var unlockAudio = new Audio();
                 unlockAudio.play().catch(function(e) {
-                    console.log('Áudio desbloqueado após interação do usuário');
                 });
             } catch (e) {
-                console.error('Erro ao desbloquear áudio:', e);
             }
         });
     } else {
-        console.log('Sino de notificações desativado para esta interface');
     }
 });
 

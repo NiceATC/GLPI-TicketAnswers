@@ -137,3 +137,23 @@ transition: background-color 2s ease;
 .select-compact {
     width: 80px !important;
 }
+/* Ajustes para perfil self-service - ícones menores */
+.btn-group .btn {
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+}
+
+.btn-group .btn i {
+    font-size: 14px !important;
+}
+
+/* Reduzir padding das células de ação */
+td.center .btn-group {
+    gap: 2px;
+}
+
+td.center .btn-group .btn {
+    min-width: 32px !important;
+    height: 32px !important;
+}

@@ -118,12 +118,22 @@ try {
     $query10 = "INSERT INTO glpi_plugin_ticketanswers_views (ticket_id, users_id, followup_id, viewed_at)
                 SELECT t.id, $users_id, CONCAT('unassigned_', t.id), '$current_datetime'
                 FROM glpi_tickets t
-                INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 1 AND tu.users_id = $users_id
                 LEFT JOIN glpi_tickets_users tech ON t.id = tech.tickets_id AND tech.type = 2
                 LEFT JOIN glpi_groups_tickets gt ON t.id = gt.tickets_id AND gt.type = 2
                 LEFT JOIN glpi_plugin_ticketanswers_views v ON v.users_id = $users_id 
                     AND v.followup_id = CONCAT('unassigned_', t.id)
-                WHERE tech.id IS NULL AND gt.id IS NULL AND v.id IS NULL AND t.status IN (1, 2)
+                WHERE tech.id IS NULL 
+                    AND gt.id IS NULL 
+                    AND v.id IS NULL 
+                    AND t.status IN (1, 2)
+                    AND t.date >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                    AND EXISTS (
+                        SELECT 1 
+                        FROM glpi_profiles_users pu 
+                        INNER JOIN glpi_profiles p ON pu.profiles_id = p.id 
+                        WHERE pu.users_id = $users_id 
+                        AND (p.name LIKE '%admin%' OR p.name LIKE '%tecn%' OR p.name LIKE '%super%')
+                    )
                 ON DUPLICATE KEY UPDATE viewed_at = '$current_datetime'";
     
     $DB->doQuery($query10);

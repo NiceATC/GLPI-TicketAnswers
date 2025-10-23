@@ -263,6 +263,11 @@ window.NotificationDropdown = {
     },
     
     markAllAsRead: function() {
+        // Diálogo de confirmação
+        if (!confirm('Tem certeza que deseja marcar todas as notificações como lidas?')) {
+            return;
+        }
+        
         jQuery.ajax({
             url: CFG_GLPI.root_doc + '/plugins/ticketanswers/ajax/mark_all_as_read.php',
             method: 'POST',
