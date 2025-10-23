@@ -1,0 +1,121 @@
+# GLPI Plugin - Ticket Answers
+# Copyright (C) 2023-2025 Jeferson Penna Alves
+# This file is distributed under the same license as the GLPI - Ticket Answers package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Ticket Answers 2.0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-23 12:00-0300\n"
+"PO-Revision-Date: 2025-10-23 12:00-0300\n"
+"Last-Translator: Jeferson Penna Alves <jefersonpenna@gmail.com>\n"
+"Language-Team: Portuguese (Brazil)\n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Ticket Answers"
+msgstr "Respostas de Tickets"
+
+msgid "Configuration"
+msgstr "Configuração"
+
+msgid "Statistics"
+msgstr "Estatísticas"
+
+msgid "Notifications"
+msgstr "Notificações"
+
+msgid "No new notifications"
+msgstr "Não há novas notificações"
+
+msgid "Mark all as read"
+msgstr "Marcar todos como lido"
+
+msgid "View ticket"
+msgstr "Ver chamado"
+
+msgid "Ticket"
+msgstr "Chamado"
+
+msgid "Date"
+msgstr "Data"
+
+msgid "User"
+msgstr "Usuário"
+
+msgid "Response"
+msgstr "Resposta"
+
+msgid "Actions"
+msgstr "Ações"
+
+msgid "Settings saved successfully"
+msgstr "Configurações salvas com sucesso"
+
+msgid "Check interval (seconds)"
+msgstr "Intervalo de verificação (segundos)"
+
+msgid "Enable sound notification"
+msgstr "Habilitar notificação sonora"
+
+msgid "Notifications per page"
+msgstr "Notificações por página"
+
+msgid "Notifications Summary"
+msgstr "Resumo de Notificações"
+
+msgid "Total notifications viewed"
+msgstr "Total de notificações visualizadas"
+
+msgid "Notifications by day"
+msgstr "Notificações por dia"
+
+msgid "Count"
+msgstr "Quantidade"
+
+msgid "View in new tab"
+msgstr "Ver em nova aba"
+
+msgid "Validation"
+msgstr "Validação"
+
+msgid "Validation Request"
+msgstr "Solicitação de Validação"
+
+msgid "requested validation"
+msgstr "solicitou validação"
+
+msgid "sent validation request"
+msgstr "enviou solicitação de validação"
+
+msgid "Technical Response"
+msgstr "Resposta técnica"
+
+msgid "Ticket Status"
+msgstr "Status do chamado"
+
+msgid "Pending"
+msgstr "Pendente"
+
+msgid "to group"
+msgstr "para grupo"
+
+msgid "Validation Approved"
+msgstr "Validação Aprovada"
+
+msgid "Validation Refused"
+msgstr "Validação Recusada"
+
+msgid "Validation Response"
+msgstr "Resp. Validação"
+
+msgid "approved validation"
+msgstr "aprovou a validação"
+
+msgid "refused validation"
+msgstr "recusou a validação"
+
+msgid "Pending comment"
+msgstr "Comentário de pendência"

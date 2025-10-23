@@ -18,7 +18,7 @@ class PluginTicketanswersMenu extends CommonGLPI {
    static $rightname = 'plugin_ticketanswers';
 
    static function getMenuName() {
-      return "Ticket Answers";
+      return __('Ticket Answers', 'ticketanswers');
    }
 
    static function getMenuContent() {
@@ -30,7 +30,7 @@ class PluginTicketanswersMenu extends CommonGLPI {
       // Adicionar submenus se necessário
       // $menu['options'] = [
       //    'stats' => [
-      //       'title' => __('Estatísticas', 'ticketanswers'),
+      //       'title' => __('Statistics', 'ticketanswers'),
       //       'page'  => Plugin::getWebDir('ticketanswers', false) . '/front/stats.php',
       //       'icon'  => 'ti ti-chart-bar',
       //    ],
@@ -42,7 +42,7 @@ class PluginTicketanswersMenu extends CommonGLPI {
    // Adicione estes métodos para a funcionalidade de aba em tickets
    function getTabNameForItem(CommonGLPI $item, $withtemplate = 0) {
       if ($item->getType() == 'Ticket') {
-         return 'Ticket Answers';
+         return __('Ticket Answers', 'ticketanswers');
       }
       return '';
    }
@@ -51,7 +51,7 @@ class PluginTicketanswersMenu extends CommonGLPI {
       if ($item->getType() == 'Ticket') {
          // Código para exibir o conteúdo da aba
          echo "<div class='center'>";
-         echo "<h3>Ticket Answers</h3>";
+         echo "<h3>" . __('Ticket Answers', 'ticketanswers') . "</h3>";
          // Seu código aqui
          echo "</div>";
       }

@@ -5,10 +5,9 @@ Session::checkLoginUser();
 
 Html::header("Ticket Answers", $_SERVER['PHP_SELF'], "plugins", "PluginTicketanswersMenu");
 
-// Carregar CSS primeiro
-echo Html::css("/plugins/ticketanswers/css/ticketanswers.css");
-
-echo Html::css("/plugins/ticketanswers/css/vol_icone_notification.css");
+// Carregar CSS - usar caminho relativo ao plugin
+echo '<link rel="stylesheet" href="../css/ticketanswers.css">';
+echo '<link rel="stylesheet" href="../css/vol_icone_notification.css">';
 
 // Obter configurações
 $config = Config::getConfigurationValues('plugin:ticketanswers');
@@ -34,11 +33,11 @@ window.ticketAnswersConfig = {
 };
 </script>";
 
-// Carregar o script unificado de notificações - CORRIGIDO O CAMINHO
-echo Html::script("/plugins/ticketanswers/js/unified_notifications.js");
+// Carregar o script unificado de notificações
+echo '<script src="../js/unified_notifications.js"></script>';
 
-// Carregar o script do sino de notificações
-echo Html::script("/plugins/ticketanswers/js/notification_bell.js");
+// Carregar o script do sino de notificações  
+echo '<script src="../js/notification_bell.js"></script>';
 
 // Adicionar as funções JavaScript necessárias diretamente no arquivo
 echo "<script>
@@ -795,14 +794,14 @@ UNION
 )
 UNION
 (
-    -- Notificações de chamados pendentes com motivo
+    -- Notificações de chamados pendentes
     SELECT
         t.id AS ticket_id,
         t.name AS ticket_name,
         t.content AS ticket_content,
         0 AS followup_id,
-        pri.last_bump_date AS notification_date,
-        CONCAT('Chamado pendente - Motivo: ', pr.name) AS followup_content,
+        t.date_mod AS notification_date,
+        'Chamado pendente' AS followup_content,
         u.name AS user_name,
         NULL AS group_name,
         NULL AS refuse_reason,
@@ -810,18 +809,17 @@ UNION
     FROM
         glpi_tickets t
         INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 1 AND tu.users_id = $users_id
-        INNER JOIN glpi_pendingreasons_items pri ON t.id = pri.items_id AND pri.itemtype = 'Ticket'
-        INNER JOIN glpi_pendingreasons pr ON pri.pendingreasons_id = pr.id
         LEFT JOIN glpi_users u ON t.users_id_recipient = u.id
         LEFT JOIN glpi_plugin_ticketanswers_views v ON (
             v.users_id = $users_id AND
             v.ticket_id = t.id AND
-            v.followup_id = CONCAT('pending_', t.id, '_', pri.pendingreasons_id)
+            v.followup_id = CONCAT('pending_', t.id)
         )
     WHERE
         v.id IS NULL
-        AND t.status = 3  -- Pendente
-        AND pri.last_bump_date > DATE_SUB(NOW(), INTERVAL 7 DAY)
+        AND t.status = 3
+        AND t.waiting_duration > 0
+        AND t.date_mod > DATE_SUB(NOW(), INTERVAL 7 DAY)
 )";
 
 

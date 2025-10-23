@@ -25,6 +25,22 @@ function plugin_ticketanswers_install() {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC");
     }
     
+    // Criar a tabela de preferências de notificação se não existir
+    if (!$DB->tableExists('glpi_plugin_ticketanswers_notification_prefs')) {
+        $table = 'glpi_plugin_ticketanswers_notification_prefs';
+        
+        $DB->doQuery("CREATE TABLE IF NOT EXISTS `$table` (
+            `id` int unsigned NOT NULL AUTO_INCREMENT,
+            `users_id` int unsigned NOT NULL,
+            `enable_sound` tinyint(1) NOT NULL DEFAULT 1,
+            `sound_volume` int NOT NULL DEFAULT 70,
+            `check_interval` int NOT NULL DEFAULT 5,
+            `notifications_per_page` int NOT NULL DEFAULT 10,
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `users_id` (`users_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC");
+    }
+    
     // Instalar direitos de perfil
     PluginTicketanswersProfile::install();
     
@@ -68,10 +84,48 @@ function plugin_ticketanswers_update($current_version) {
             $migration->migrationOneTable($table);
         }
         
+        // Criar tabela de preferências se não existir
+        if (!$DB->tableExists('glpi_plugin_ticketanswers_notification_prefs')) {
+            $prefs_table = 'glpi_plugin_ticketanswers_notification_prefs';
+            $migration->createTable($prefs_table, [
+                'id' => [
+                    'type' => 'int unsigned',
+                    'notnull' => true,
+                    'autoincrement' => true
+                ],
+                'users_id' => [
+                    'type' => 'int unsigned',
+                    'notnull' => true
+                ],
+                'enable_sound' => [
+                    'type' => 'bool',
+                    'notnull' => true,
+                    'default' => 1
+                ],
+                'sound_volume' => [
+                    'type' => 'int',
+                    'notnull' => true,
+                    'default' => 70
+                ],
+                'check_interval' => [
+                    'type' => 'int',
+                    'notnull' => true,
+                    'default' => 5
+                ],
+                'notifications_per_page' => [
+                    'type' => 'int',
+                    'notnull' => true,
+                    'default' => 10
+                ]
+            ]);
+            $migration->addKey($prefs_table, 'users_id', 'users_id', 'UNIQUE');
+            $migration->migrationOneTable($prefs_table);
+        }
+        
         // Atualizar direitos de perfil
         PluginTicketanswersProfile::install();
         
-        Toolbox::logInFile('plugin_ticketanswers', "Plugin atualizado para versão 2.0.0 (GLPI 11)\n");
+        Toolbox::logInFile('plugin_ticketanswers', "Plugin atualizado para versão 2.0.1 (GLPI 11)\n");
     }
     
     return true;
@@ -84,9 +138,13 @@ function plugin_ticketanswers_uninstall() {
     // Remover direitos de perfil
     PluginTicketanswersProfile::uninstall();
     
-    // Remover tabela
+    // Remover tabelas
     if ($DB->tableExists("glpi_plugin_ticketanswers_views")) {
        $DB->doQuery("DROP TABLE `glpi_plugin_ticketanswers_views`");
+    }
+    
+    if ($DB->tableExists("glpi_plugin_ticketanswers_notification_prefs")) {
+       $DB->doQuery("DROP TABLE `glpi_plugin_ticketanswers_notification_prefs`");
     }
     
     return true;

@@ -1,0 +1,11 @@
+# Git attributes for ticketanswers plugin
+
+# Treat .mo files as binary
+*.mo binary
+
+# Ensure .po and .pot files use LF line endings
+*.po text eol=lf
+*.pot text eol=lf
+
+# Python script
+*.py text eol=lf

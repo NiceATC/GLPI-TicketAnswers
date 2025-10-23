@@ -1,0 +1,121 @@
+# GLPI Plugin - Ticket Answers
+# Copyright (C) 2023-2025 Jeferson Penna Alves
+# This file is distributed under the same license as the GLPI - Ticket Answers package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Ticket Answers 2.0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-23 12:00-0300\n"
+"PO-Revision-Date: 2025-10-23 12:00-0300\n"
+"Last-Translator: Jeferson Penna Alves <jefersonpenna@gmail.com>\n"
+"Language-Team: English (United States)\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Ticket Answers"
+msgstr "Ticket Answers"
+
+msgid "Configuration"
+msgstr "Configuration"
+
+msgid "Statistics"
+msgstr "Statistics"
+
+msgid "Notifications"
+msgstr "Notifications"
+
+msgid "No new notifications"
+msgstr "No new notifications"
+
+msgid "Mark all as read"
+msgstr "Mark all as read"
+
+msgid "View ticket"
+msgstr "View ticket"
+
+msgid "Ticket"
+msgstr "Ticket"
+
+msgid "Date"
+msgstr "Date"
+
+msgid "User"
+msgstr "User"
+
+msgid "Response"
+msgstr "Response"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "Settings saved successfully"
+msgstr "Settings saved successfully"
+
+msgid "Check interval (seconds)"
+msgstr "Check interval (seconds)"
+
+msgid "Enable sound notification"
+msgstr "Enable sound notification"
+
+msgid "Notifications per page"
+msgstr "Notifications per page"
+
+msgid "Notifications Summary"
+msgstr "Notifications Summary"
+
+msgid "Total notifications viewed"
+msgstr "Total notifications viewed"
+
+msgid "Notifications by day"
+msgstr "Notifications by day"
+
+msgid "Count"
+msgstr "Count"
+
+msgid "View in new tab"
+msgstr "View in new tab"
+
+msgid "Validation"
+msgstr "Validation"
+
+msgid "Validation Request"
+msgstr "Validation Request"
+
+msgid "requested validation"
+msgstr "requested validation"
+
+msgid "sent validation request"
+msgstr "sent validation request"
+
+msgid "Technical Response"
+msgstr "Technical Response"
+
+msgid "Ticket Status"
+msgstr "Ticket Status"
+
+msgid "Pending"
+msgstr "Pending"
+
+msgid "to group"
+msgstr "to group"
+
+msgid "Validation Approved"
+msgstr "Validation Approved"
+
+msgid "Validation Refused"
+msgstr "Validation Refused"
+
+msgid "Validation Response"
+msgstr "Validation Response"
+
+msgid "approved validation"
+msgstr "approved validation"
+
+msgid "refused validation"
+msgstr "refused validation"
+
+msgid "Pending comment"
+msgstr "Pending comment"

@@ -3,6 +3,8 @@ include ("../../../inc/includes.php");
 
 Session::checkLoginUser();
 
+global $DB;
+
 // Verificar se os parâmetros necessários foram fornecidos
 $ticket_id = isset($_GET['ticket_id']) ? intval($_GET['ticket_id']) : 0;
 $followup_id = isset($_GET['followup_id']) ? intval($_GET['followup_id']) : 0;

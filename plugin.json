@@ -1,6 +1,6 @@
 {
   "name": "ticketanswers",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "glpi_min_version": "11.0",
   "php_min_version": "8.1",
   "author": "Jeferson Penna Alves",
@@ -35,6 +35,18 @@
     "Suporte a múltiplos idiomas"
   ],
   "changelog": {
+    "2.0.1": {
+      "date": "2025-10-23",
+      "description": "Sistema de traduções gettext implementado",
+      "changes": [
+        "Sistema completo de traduções gettext para GLPI 11",
+        "Arquivos .po, .mo e .pot criados e funcionais",
+        "Suporte a pt_BR e en_US",
+        "Script de compilação Python incluído",
+        "Documentação completa de traduções",
+        "Correção do erro 404 em locales/"
+      ]
+    },
     "2.0.0": {
       "date": "2025-10-22",
       "description": "Atualização completa para GLPI 11",

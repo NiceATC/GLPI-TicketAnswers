@@ -19,7 +19,7 @@
   --------------------------------------------------------------------------
 */
 
-define('PLUGIN_TICKETANSWERS_VERSION', '2.0.0');
+define('PLUGIN_TICKETANSWERS_VERSION', '2.0.1');
 
 // Definir diretório raiz do plugin
 define('PLUGIN_TICKETANSWERS_DIR', Plugin::getPhpDir('ticketanswers'));
@@ -33,23 +33,15 @@ function plugin_init_ticketanswers() {
    
     $PLUGIN_HOOKS['csrf_compliant']['ticketanswers'] = true;
     
-    // DESABILITAR COMPLETAMENTE O SISTEMA DE TRADUÇÕES DO GLPI
-    // Isso previne o carregamento de locales e o erro 404
-    $PLUGIN_HOOKS['add_javascript']['ticketanswers'] = false;
-    $PLUGIN_HOOKS['add_css']['ticketanswers'] = false;
+    // Registrar as classes do plugin
+    Plugin::registerClass('PluginTicketanswersProfile', ['addtabon' => 'Profile']);
    
     if (Session::getLoginUserID()) {
-        // Não adicionar JS/CSS globalmente - isso causa conflitos
-        // Os arquivos serão carregados apenas nas páginas do plugin
-        // $PLUGIN_HOOKS['add_javascript']['ticketanswers'] = [
-        //     'js/unified_notifications.js',
-        //     'js/notification_bell.js',
-        //     'js/fix_layout.js'
-        // ];
-        // $PLUGIN_HOOKS['add_css']['ticketanswers'][] = 'css/self_service_fixes.css';
-        
-        Plugin::registerClass('PluginTicketanswersProfile', ['addtabon' => 'Profile']);
+        // Adicionar menu ao GLPI
         $PLUGIN_HOOKS['menu_toadd']['ticketanswers'] = ['plugins' => 'PluginTicketanswersMenu'];
+        
+        // JS e CSS serão carregados apenas nas páginas do plugin
+        // para evitar conflitos com o GLPI core
     }
 }
 /**

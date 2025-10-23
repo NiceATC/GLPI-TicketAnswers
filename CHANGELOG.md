@@ -5,6 +5,48 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [2.0.1] - 2025-10-23
+
+### Adicionado
+- ✅ **Sistema completo de traduções gettext para GLPI 11**
+  - Criada pasta `locales/` com estrutura correta
+  - Arquivo template `ticketanswers.pot` com todas as strings traduzíveis
+  - Traduções completas em `pt_BR.po` (Português Brasil)
+  - Traduções completas em `en_US.po` (Inglês EUA)
+  - Arquivos binários compilados `pt_BR.mo` e `en_US.mo`
+  - Script Python `compile_translations.py` para compilar traduções sem gettext
+  - Documentação completa em `locales/README_TRANSLATIONS.md`
+  - Arquivo `.gitattributes` para tratamento correto dos binários
+- ✅ **Tabela `glpi_plugin_ticketanswers_notification_prefs`** para preferências de usuário
+  - Campos: enable_sound, sound_volume, check_interval, notifications_per_page
+  - Criada automaticamente na instalação e atualização
+  - Removida automaticamente na desinstalação
+
+### Alterado
+- ✅ Todas as strings hardcoded substituídas por chamadas `__()` de tradução
+- ✅ Atualizado `setup.php` para remover bloqueios de tradução
+- ✅ Atualizado `inc/menu.class.php` com funções de tradução
+- ✅ Atualizado `inc/ticketanswers.class.php` com funções de tradução
+- ✅ Atualizado `inc/config.class.php` com funções de tradução
+- ✅ Script `compile_translations.py` melhorado com validação UTF-8
+  - Tratamento UTF-8-BOM (`utf-8-sig`)
+  - Validação de encoding antes de adicionar traduções
+  - Try/catch para caracteres inválidos
+  - Logs de warning para strings problemáticas
+
+### Corrigido
+- ✅ **CRÍTICO: Erro "Malformed UTF-8 characters" nos arquivos .mo**
+  - Recompilados com validação adequada de encoding
+  - Script Python agora valida UTF-8 antes de compilar
+- ✅ **CRÍTICO: Table 'glpi_plugin_ticketanswers_notification_prefs' doesn't exist**
+  - Tabela criada em `plugin_ticketanswers_install()`
+  - Tabela criada em `plugin_ticketanswers_update()` para migrações
+  - Tabela removida em `plugin_ticketanswers_uninstall()`
+- ✅ **Erro 404 em locales/** - Sistema de traduções agora totalmente funcional
+- ✅ Plugin agora segue a documentação oficial do GLPI 11 para traduções
+- ✅ Compatibilidade total com sistema gettext do GLPI
+- ✅ Avisos "Undefined array key 'domain'" eliminados
+
 ## [2.0.0] - 2025-10-22
 
 ### Adicionado

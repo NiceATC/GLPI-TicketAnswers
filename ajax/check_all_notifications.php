@@ -246,21 +246,21 @@ WHERE
     AND t.date_mod > DATE_SUB(NOW(), INTERVAL 7 DAY)";  // Adicionado fechamento de aspas aqui
 
 // Consulta para encontrar motivos de pendência em chamados do usuário
+// GLPI 11 não usa mais pendingreasons_id, usa waiting_duration
 $pending_reason_query = "SELECT COUNT(DISTINCT t.id) as pending_reason_count
 FROM
     glpi_tickets t
     INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 1 AND tu.users_id = $users_id
-    LEFT JOIN glpi_pendingreasons pt ON t.pendingreasons_id = pt.id
     LEFT JOIN glpi_plugin_ticketanswers_views v ON (
         v.users_id = $users_id AND
         v.ticket_id = t.id AND
-        v.followup_id = CONCAT('pending_', t.id, '_', t.pendingreasons_id)
+        v.followup_id = CONCAT('pending_', t.id)
     )
 WHERE
     v.id IS NULL
     AND t.status = 3
-    AND t.pendingreasons_id > 0
-    AND t.date_mod > DATE_SUB(NOW(), INTERVAL 7 DAY)";  // Adicionado fechamento de aspas aqui
+    AND t.waiting_duration > 0
+    AND t.date_mod > DATE_SUB(NOW(), INTERVAL 7 DAY)";
 
 
 // Executar as novas consultas
@@ -695,22 +695,21 @@ $unified_count_query = "SELECT COUNT(*) as total FROM (
         -- Notificações de motivos de pendência em chamados do usuário
         SELECT
             t.id AS ticket_id,
-            CONCAT('pending_', t.id, '_', t.pendingreasons_id) AS followup_id,
+            CONCAT('pending_', t.id) AS followup_id,
             t.date_mod AS notification_date,
             'pending_reason' AS type
         FROM
             glpi_tickets t
             INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 1 AND tu.users_id = $users_id
-            LEFT JOIN glpi_pendingreasons pt ON t.pendingreasons_id = pt.id
             LEFT JOIN glpi_plugin_ticketanswers_views v ON (
                 v.users_id = $users_id AND
                 v.ticket_id = t.id AND
-                v.followup_id = CONCAT('pending_', t.id, '_', t.pendingreasons_id)
+                v.followup_id = CONCAT('pending_', t.id)
             )
         WHERE
             v.id IS NULL
             AND t.status = 3
-            AND t.pendingreasons_id > 0
+            AND t.waiting_duration > 0
             AND t.date_mod > DATE_SUB(NOW(), INTERVAL 7 DAY)
         
         UNION

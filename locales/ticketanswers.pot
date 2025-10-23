@@ -1,0 +1,120 @@
+# GLPI Plugin - Ticket Answers
+# Copyright (C) 2023-2025 Jeferson Penna Alves
+# This file is distributed under the same license as the GLPI - Ticket Answers package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Ticket Answers 2.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-23 12:00-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Ticket Answers"
+msgstr ""
+
+msgid "Configuration"
+msgstr ""
+
+msgid "Statistics"
+msgstr ""
+
+msgid "Notifications"
+msgstr ""
+
+msgid "No new notifications"
+msgstr ""
+
+msgid "Mark all as read"
+msgstr ""
+
+msgid "View ticket"
+msgstr ""
+
+msgid "Ticket"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "User"
+msgstr ""
+
+msgid "Response"
+msgstr ""
+
+msgid "Actions"
+msgstr ""
+
+msgid "Settings saved successfully"
+msgstr ""
+
+msgid "Check interval (seconds)"
+msgstr ""
+
+msgid "Enable sound notification"
+msgstr ""
+
+msgid "Notifications per page"
+msgstr ""
+
+msgid "Notifications Summary"
+msgstr ""
+
+msgid "Total notifications viewed"
+msgstr ""
+
+msgid "Notifications by day"
+msgstr ""
+
+msgid "Count"
+msgstr ""
+
+msgid "View in new tab"
+msgstr ""
+
+msgid "Validation"
+msgstr ""
+
+msgid "Validation Request"
+msgstr ""
+
+msgid "requested validation"
+msgstr ""
+
+msgid "sent validation request"
+msgstr ""
+
+msgid "Technical Response"
+msgstr ""
+
+msgid "Ticket Status"
+msgstr ""
+
+msgid "Pending"
+msgstr ""
+
+msgid "to group"
+msgstr ""
+
+msgid "Validation Approved"
+msgstr ""
+
+msgid "Validation Refused"
+msgstr ""
+
+msgid "Validation Response"
+msgstr ""
+
+msgid "approved validation"
+msgstr ""
+
+msgid "refused validation"
+msgstr ""
+
+msgid "Pending comment"
+msgstr ""

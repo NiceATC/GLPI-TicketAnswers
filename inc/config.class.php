@@ -21,7 +21,7 @@ class PluginTicketanswersConfig extends CommonDBTM {
     * @see CommonGLPI::getMenuName()
    **/
    static function getMenuName() {
-      return 'Ticket Answers';
+      return __('Ticket Answers', 'ticketanswers');
    }
    
    /**
@@ -30,7 +30,7 @@ class PluginTicketanswersConfig extends CommonDBTM {
    static function getMenuContent() {
       $menu = [];
 
-      $menu['title'] = 'Ticket Answers';
+      $menu['title'] = __('Ticket Answers', 'ticketanswers');
       $menu['page']  = Plugin::getWebDir('ticketanswers', false) . '/front/index.php';
       $menu['icon']  = 'ti ti-bell'; // Ícone compatível com GLPI 11
       
