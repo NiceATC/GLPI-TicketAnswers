@@ -5,10 +5,6 @@ Session::checkLoginUser();
 
 Html::header("Ticket Answers", $_SERVER['PHP_SELF'], "plugins", "PluginTicketanswersMenu");
 
-// Carregar CSS - usar caminho relativo ao plugin
-echo '<link rel="stylesheet" href="../css/ticketanswers.css">';
-echo '<link rel="stylesheet" href="../css/vol_icone_notification.css">';
-
 // Obter configurações
 $config = Config::getConfigurationValues('plugin:ticketanswers');
 $check_interval = $config['check_interval'] ?? 5;
@@ -32,12 +28,6 @@ window.ticketAnswersConfig = {
     soundVolume: " . $sound_volume . "
 };
 </script>";
-
-// Carregar o script unificado de notificações
-echo '<script src="../js/unified_notifications.js"></script>';
-
-// Carregar o script do sino de notificações  
-echo '<script src="../js/notification_bell.js"></script>';
 
 // Adicionar as funções JavaScript necessárias diretamente no arquivo
 echo "<script>
@@ -1265,18 +1255,34 @@ echo "</td>";
     echo "</div>"; // Fim do container de ticket-notifications
     echo "</div>"; // Fim do container central
     
-    echo "<script>
-    $(document).ready(function() {
-        // Inicializar o sino de notificações
-        if (typeof addNotificationBell === 'function') {
-            console.log('Inicializando sino de notificações...');
-            addNotificationBell();
-            addNotificationStyles();
+    // Carregar arquivos JavaScript diretamente (fallback caso o hook global não funcione)
+    echo '<script>console.log("🔧 TicketAnswers: Carregando scripts na página do plugin...");</script>';
+    
+    $js_files = [
+        PLUGIN_TICKETANSWERS_DIR . '/js/unified_notifications.js',
+        PLUGIN_TICKETANSWERS_DIR . '/js/notification_bell.js'
+    ];
+
+    echo "<script>";
+    foreach ($js_files as $js_file) {
+        if (file_exists($js_file)) {
+            echo "\n// ===== " . basename($js_file) . " =====\n";
+            echo file_get_contents($js_file);
+            echo "\nconsole.log('✅ TicketAnswers (página): " . basename($js_file) . " carregado');\n";
         } else {
-            console.error('Função addNotificationBell não encontrada!');
+            echo "\nconsole.error('❌ Arquivo não encontrado: " . $js_file . "');\n";
         }
-    });
-    </script>";
+    }
+    echo "</script>";
+
+    // Carregar CSS diretamente
+    $css_file = PLUGIN_TICKETANSWERS_DIR . '/css/vol_icone_notification.css';
+    if (file_exists($css_file)) {
+        echo "<style>";
+        echo file_get_contents($css_file);
+        echo "</style>";
+        echo "<script>console.log('✅ TicketAnswers (página): CSS carregado');</script>";
+    }
 
     echo "<script>
     $(document).ready(function() {

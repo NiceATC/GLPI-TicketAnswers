@@ -39,11 +39,9 @@ function plugin_init_ticketanswers() {
     if (Session::getLoginUserID()) {
         // Adicionar menu ao GLPI
         $PLUGIN_HOOKS['menu_toadd']['ticketanswers'] = ['plugins' => 'PluginTicketanswersMenu'];
-        
-        // JS e CSS serão carregados apenas nas páginas do plugin
-        // para evitar conflitos com o GLPI core
     }
 }
+
 /**
   * Informações do plugin
   */
