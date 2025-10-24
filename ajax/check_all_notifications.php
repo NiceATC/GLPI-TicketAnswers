@@ -284,37 +284,6 @@ WHERE
         AND (p.name LIKE '%admin%' OR p.name LIKE '%tecn%' OR p.name LIKE '%super%')
     )";
 
-
-// DEBUG: Query de diagnóstico para status_change
-$status_debug = "SELECT 
-    t.id,
-    t.name,
-    t.status,
-    t.date_mod,
-    CONCAT('status_', t.id, '_', t.status) as followup_id_expected,
-    v.id as view_id,
-    v.followup_id as view_followup_id
-FROM
-    glpi_tickets t
-    INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 1 AND tu.users_id = $users_id
-    LEFT JOIN glpi_plugin_ticketanswers_views v ON (
-        v.users_id = $users_id AND
-        v.ticket_id = t.id AND
-        v.followup_id = CONCAT('status_', t.id, '_', t.status)
-    )
-WHERE
-    t.status IN (2, 3, 4)
-    AND t.date_mod > DATE_SUB(NOW(), INTERVAL 7 DAY)
-LIMIT 5";
-
-$debug_result = $DB->doQuery($status_debug);
-$status_debug_info = [];
-if ($debug_result && $debug_result->num_rows > 0) {
-    while ($row = $debug_result->fetch_assoc()) {
-        $status_debug_info[] = $row;
-    }
-}
-
 // Executar as novas consultas
 $technician_response_result = $DB->doQuery($technician_response_query);
 $status_change_result = $DB->doQuery($status_change_query);
@@ -627,7 +596,8 @@ $unified_count_query = "SELECT COUNT(*) as total FROM (
                 v.followup_id = tf.id
             )
         WHERE
-            v.id IS NULL
+            tf.users_id <> $users_id
+            AND v.id IS NULL
             AND t.status != 6
             AND tf.is_private = 0
             AND EXISTS (
@@ -800,66 +770,6 @@ $total_count_sum = $followup_count + $refused_count + $group_count + $observer_c
 // Usar o maior valor como total principal
 $final_count = max($total_count_unified, $total_count_sum);
 
-// DEBUG: Se houver discrepância, buscar a notificação fantasma
-$debug_phantom = [];
-if ($final_count > 0 && $total_count_sum == 0) {
-    // Buscar qual notificação está sendo contada pela query unificada
-    $phantom_query = "SELECT 
-        ticket_id,
-        type,
-        followup_id,
-        notification_date
-    FROM (
-        -- Cópia exata da query unificada, mas retornando detalhes
-        SELECT
-            t.id AS ticket_id,
-            tf.id AS followup_id,
-            tf.date AS notification_date,
-            'followup' AS type
-        FROM
-            glpi_tickets t
-            INNER JOIN glpi_tickets_users tu ON t.id = tu.tickets_id AND tu.type = 2 AND tu.users_id = $users_id
-            INNER JOIN glpi_itilfollowups tf ON t.id = tf.items_id AND tf.itemtype = 'Ticket'
-            LEFT JOIN glpi_users u ON tf.users_id = u.id
-            LEFT JOIN glpi_plugin_ticketanswers_views v ON (
-                v.users_id = $users_id AND
-                v.followup_id = tf.id
-            )
-        WHERE
-            tf.users_id <> $users_id
-            AND v.id IS NULL
-            AND t.status != 6
-            AND tf.is_private = 0
-            AND tf.date > (
-                SELECT
-                    COALESCE(MAX(date), '1970-01-01')
-                FROM
-                    glpi_itilfollowups tf2
-                WHERE
-                    tf2.items_id = t.id
-                    AND tf2.itemtype = 'Ticket'
-                    AND tf2.users_id = $users_id
-            )
-            AND NOT EXISTS (
-                SELECT 1
-                FROM glpi_itilsolutions its
-                WHERE its.items_id = t.id
-                AND its.itemtype = 'Ticket'
-                AND its.status = 4
-                AND its.users_id_approval = tf.users_id
-                AND ABS(UNIX_TIMESTAMP(its.date_approval) - UNIX_TIMESTAMP(tf.date)) <= 3
-            )
-    ) AS all_notif
-    LIMIT 5";
-    
-    $phantom_result = $DB->doQuery($phantom_query);
-    if ($phantom_result && $phantom_result->num_rows > 0) {
-        while ($row = $phantom_result->fetch_assoc()) {
-            $debug_phantom[] = $row;
-        }
-    }
-}
-
 // Preparar a resposta com o valor correto de contagem
 $response = [
     'count' => $final_count,
@@ -876,10 +786,8 @@ $response = [
     'status_change_count' => $status_change_count,
     'pending_reason_count' => $pending_reason_count,
     'unassigned_count' => $unassigned_count,
-    'combined_count' => $final_count,  // Usar o mesmo valor final aqui
-    'timestamp' => time(),
-    'debug_phantom' => $debug_phantom,  // Mostrar notificação fantasma se existir
-    'debug_status_change' => $status_debug_info  // DEBUG: Info sobre status_change
+    'combined_count' => $final_count,
+    'timestamp' => time()
 ];
 
 

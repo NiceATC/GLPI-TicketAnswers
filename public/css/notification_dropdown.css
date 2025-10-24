@@ -7,18 +7,19 @@
 .notification-bell-container {
     position: relative;
     display: inline-block;
+    z-index: 20; /* garante que fique acima do botão vizinho */
     /* Importante para que o dropdown seja relativo a este container */
 }
 
 .notification-bell-container .notification-badge {
     position: absolute;
-    top: -8px;
-    right: -8px;
-    min-width: 20px;
-    height: 20px;
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
     background: #e74c3c;
     color: #fff;
-    border-radius: 10px;
+    border-radius: 9px;
     font-size: 11px;
     font-weight: bold;
     display: flex;
@@ -27,7 +28,7 @@
     padding: 0 6px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     animation: badge-pop 0.3s ease-out;
-    z-index: 10;
+    z-index: 9999;
     pointer-events: none;
 }
 
@@ -44,7 +45,7 @@
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    border: 1px solid #dee2e6 !important;
+    border: 0px solid #dee2e6 !important;
 }
 
 .notification-bell i,
@@ -252,6 +253,26 @@
     display: flex;
     gap: 8px;
     background: #f8f9fa;
+}
+
+.notification-bell.btn.btn-outline-secondary {
+    border-color: #555 !important;
+    color: #ccc !important;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Cor ao passar o mouse */
+.notification-bell.btn.btn-outline-secondary:hover {
+    border-color: #555 !important;
+    color: #fff !important;
+}
+
+/* Estado ativo (quando clicado) */
+.notification-bell.btn.btn-outline-secondary:active,
+.notification-bell.btn.btn-outline-secondary:focus {
+    border-color: #444 !important;
+    color: #fff !important;
+    box-shadow: none !important;
 }
 
 .notification-dropdown-footer button {

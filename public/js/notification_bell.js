@@ -158,11 +158,11 @@ function addNotificationBell() {
 // Função para obter o botão de notificação
 function getNotificationButton() {
     return $(`
-        <div class="notification-bell-container" style="position: relative; display: inline-block;">
-            <button type="button" class="notification-bell btn btn-outline-secondary" title="Notificações">
+        <div class="notification-bell-container" style="position: relative;display: inline-block; margin-left: 10px;">
+            <button style="z-index: 9999; border-radius: 50px;" type="button" class="notification-bell btn btn-outline-secondary" title="Notificações">
                 <i class="fas fa-bell fa-lg"></i>
+                <span class="notification-badge hidden">0</span>
             </button>
-            <span class="notification-badge hidden">0</span>
         </div>`);
 }
 
@@ -172,7 +172,7 @@ function getSoundToggleButton() {
     const icon = soundEnabled ? 'fa-volume-up' : 'fa-volume-mute';
     const title = soundEnabled ? 'Desativar som de notificações' : 'Ativar som de notificações';
     return $(`
-        <button type="button" class="sound-toggle btn btn-outline-secondary" title="${title}">
+        <button style="border-radius: 50px;" type="button" class="sound-toggle btn btn-outline-secondary" title="${title}">
             <i class="fas ${icon} fa-lg"></i>
         </button>`);
 }
@@ -365,7 +365,9 @@ function addNotificationStyles() {
         /* Sino com notificações */
         .notification-bell .has-notifications,
         .notification-bell i.has-notifications {
-            color: #ff0000 !important;
+            color: #e74c3c  !important;
+            animation: bell-shake 1.2s ease-in-out;
+            transform-origin: top center;
         }
         
         /* Indicador numérico */
@@ -473,11 +475,6 @@ function checkNotifications() {
                                     (data.pending_reason_count || 0) + 
                                     (data.unassigned_count || 0);
             
-            console.log('📊 Análise:', {
-                combined_count: data.combined_count || 0,
-                soma_individual: soma_individual,
-                diferenca: (data.combined_count || 0) - soma_individual
-            });
             
             if (data.debug_phantom && data.debug_phantom.length > 0) {
                 console.log('👻 Notificações fantasma:', data.debug_phantom);
@@ -526,7 +523,6 @@ function updateNotificationCount(count) {
         badge.removeClass('hidden');
         
         // Sino vermelho quando há notificações
-        bell.removeClass('btn-outline-secondary').addClass('btn-danger');
         bellIcon.addClass('text-white has-notifications');
         
     } else {
@@ -534,7 +530,6 @@ function updateNotificationCount(count) {
         badge.addClass('hidden');
         
         // Sino normal quando não há notificações
-        bell.removeClass('btn-danger').addClass('btn-outline-secondary');
         bellIcon.removeClass('text-white has-notifications');
         
     }
