@@ -62,6 +62,12 @@ Contribuições são bem-vindas! Siga estas etapas para contribuir:
 4.  **Push:** Envie suas alterações: `git push origin feature/sua-feature`.
 5.  **Pull Request:** Abra um Pull Request para revisão.
 
+## **TO-DO**
+
+Alguns recursos que estão planejados:
+
+1.  **EM BREVE**
+
 ## **Autor Original**
 
 * **Nome:** Jeferson Penna Alves
