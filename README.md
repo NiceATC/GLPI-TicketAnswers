@@ -34,7 +34,7 @@ O Plugin Ticket Answers para GLPI foi desenvolvido para otimizar o gerenciamento
 ## **Compatibilidade**
 
 * ✅ **GLPI 11.x** - Totalmente compatível
-* ⚠️ **GLPI 10.x** - Use a versão 1.x do plugin
+* ⚠️ **GLPI 10.x** - Use a versão [1.1](https://github.com/jefersonp22/ticketanswers-v1.1) do plugin 
 * ❌ **GLPI 9.5 e anteriores** - Não compatível com esta versão
 
 ## **Instalação**
@@ -62,7 +62,7 @@ Contribuições são bem-vindas! Siga estas etapas para contribuir:
 4.  **Push:** Envie suas alterações: `git push origin feature/sua-feature`.
 5.  **Pull Request:** Abra um Pull Request para revisão.
 
-## **Autor**
+## **Autor Original**
 
 * **Nome:** Jeferson Penna Alves
 * **Versão:** 1.1.0
