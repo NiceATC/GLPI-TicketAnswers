@@ -5,7 +5,7 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
-## [2.0.1] - 2025-10-23
+## [1.2.1] - 2025-10-23
 
 ### Adicionado
 - ✅ **Sistema completo de traduções gettext para GLPI 11**
@@ -47,7 +47,7 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - ✅ Compatibilidade total com sistema gettext do GLPI
 - ✅ Avisos "Undefined array key 'domain'" eliminados
 
-## [2.0.0] - 2025-10-22
+## [1.2.0] - 2025-10-22
 
 ### Adicionado
 - Suporte completo para GLPI 11.0 e versões superiores

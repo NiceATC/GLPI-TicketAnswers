@@ -19,7 +19,7 @@
   --------------------------------------------------------------------------
 */
 
-define('PLUGIN_TICKETANSWERS_VERSION', '2.0.1');
+define('PLUGIN_TICKETANSWERS_VERSION', '1.2.1');
 
 // Definir diretório raiz do plugin
 define('PLUGIN_TICKETANSWERS_DIR', Plugin::getPhpDir('ticketanswers'));
@@ -60,11 +60,11 @@ function plugin_init_ticketanswers() {
   */
 function plugin_version_ticketanswers() {
     return [
-       'name'           => 'Respostas de Tickets e Notificações',
+       'name'           => 'TicketAnswers',
        'version'        => PLUGIN_TICKETANSWERS_VERSION,
-       'author'         => 'Jeferson Penna Alves',
+       'author'         => 'Jeferson Penna Alves & Luiz Gustavo',
        'license'        => 'GPLv2+',
-       'homepage'       => 'https://github.com/jefersonalves/ticketanswers',
+       'homepage'       => 'https://github.com/NiceATC/TicketAnswers',
        'requirements'   => [
            'glpi' => [
                'min' => '11.0',

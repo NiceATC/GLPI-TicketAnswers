@@ -1,10 +1,10 @@
 {
   "name": "ticketanswers",
-  "version": "2.0.1",
+  "version": "1.2.1",
   "glpi_min_version": "11.0",
   "php_min_version": "8.1",
-  "author": "Jeferson Penna Alves",
-  "homepage": "https://github.com/jefersonalves/ticketanswers",
+  "author": "Jeferson Penna & Luiz Gustavo",
+  "homepage": "https://github.com/NiceATC/TicketAnswers",
   "license": "GPLv2+",
   "description": {
     "pt_BR": "Plugin para gerenciamento de notificações e respostas de tickets no GLPI",
@@ -35,7 +35,7 @@
     "Suporte a múltiplos idiomas"
   ],
   "changelog": {
-    "2.0.1": {
+    "1.2.1": {
       "date": "2025-10-23",
       "description": "Sistema de traduções gettext implementado",
       "changes": [
@@ -47,7 +47,7 @@
         "Correção do erro 404 em locales/"
       ]
     },
-    "2.0.0": {
+    "1.2.0": {
       "date": "2025-10-22",
       "description": "Atualização completa para GLPI 11",
       "changes": [
@@ -60,7 +60,6 @@
     }
   },
   "support": {
-    "issues": "https://github.com/jefersonalves/ticketanswers/issues",
-    "documentation": "https://github.com/jefersonalves/ticketanswers/wiki"
+    "issues": "https://github.com/NiceATC/TicketAnswers/issues"
   }
 }
