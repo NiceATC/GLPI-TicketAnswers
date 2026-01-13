@@ -15,7 +15,6 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - Traduções completas em `en_US.po` (Inglês EUA)
   - Arquivos binários compilados `pt_BR.mo` e `en_US.mo`
   - Script Python `compile_translations.py` para compilar traduções sem gettext
-  - Documentação completa em `locales/README_TRANSLATIONS.md`
   - Arquivo `.gitattributes` para tratamento correto dos binários
 - ✅ **Tabela `glpi_plugin_ticketanswers_notification_prefs`** para preferências de usuário
   - Campos: enable_sound, sound_volume, check_interval, notifications_per_page
